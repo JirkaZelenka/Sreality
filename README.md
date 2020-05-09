@@ -1,5 +1,5 @@
 # Sreality
-#### Sraping Project - costs of houses in the Czech Republic on the biggest web portal
+#### Sraping Project - costs of houses in the Czech Republic on the biggest real-estate web 
 #### Approximately 12.000 items scraped every week and added to total.
 #### Added PowerBI with few pages of vizualizations
 #### xxx
