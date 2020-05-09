@@ -5,5 +5,5 @@
 #### xxx
 #### 12.3.- 22.4.2020 = First outputs, preparation of the automatized process of Scraping, Cleaning, Dropping data
 #### 24.-26.4. Visualizations in PowerBI
-#### 27.-28.4. Creating representative .ipynb fiels with comments
+#### 27.-28.4. Creating representative .ipynb files with comments
 #### TO be Done: Many things, mentioned in the files
