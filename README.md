@@ -2,8 +2,9 @@
 #### Web-scraping Project - costs of houses in the Czech Republic on the biggest real-estate web - "Sreality.cz"
 #### Approximately 12.000 items scraped every week and added to total - "data_prodej_byty_souhrn.xlsx"
 #### PowerBI file with ten pages of vizualizations for 29.3.-9.8.2020 - "Vizuál 10stran.pbix"
+### Four notebooks: Scraper, Cleaning & Dropping, Visualizaton, and All in one.
 #### xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-#### 12.3.- 22.4.2020 = First outputs, preparation of the automatized process of Scraping, Cleaning, Dropping data
+#### 12.3.- 22.4.2020 = First outputs, preparation of the automatized process.
 #### 24.-26.4. Visualizations in PowerBI
 #### 27.-28.4. Creating representative .ipynb files with comments
-#### TO be Done: Many things, mentioned in the files
+#### TO be Done: Many things, mentioned in the files (full automatization, reporting, historical prices via Insidero?)
