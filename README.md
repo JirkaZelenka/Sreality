@@ -1,7 +1,7 @@
 # Sreality
 #### Web-scraping Project - costs of houses in the Czech Republic on the biggest real-estate web - "Sreality.cz"
 * Approximately 12.000 items scraped every week and added to total - "data_prodej_byty_souhrn.xlsx"
-* PowerBI file with ten pages of vizualizations for 29.3.-9.8.2020 - "Vizualizace.pbix"
+* PowerBI file with some interactive visualizations for 29.3.20-1.3.201 - "Vizualizace.pbix"
 * Four notebooks: Scraper, Cleaning & Dropping, Visualizaton, and All in one.
 * To run scraping, one needs to have an up-to-date chromedriver.exe in the same folder as Jupyter notebook
 #### xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
