@@ -9,3 +9,5 @@
 * 24.-26.4. Visualizations in PowerBI
 * 27.-28.4. Creating representative .ipynb files with comments
 * TO be Done: Many things, mentioned in the files (full automatization, reporting, historical prices via Insidero?, checks, better time estimates, GPS smoothing, better way to handle extreme values, ...)
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+* 7.1.2024 started rework of the scraper
