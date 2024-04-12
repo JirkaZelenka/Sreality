@@ -1,3 +1,9 @@
-chromedriver.exe
-msedgedriver.exe
+
+# Web drivers - necessary for Selenium
+.exe
+# Env variables such as path
 .env
+# My personal notes and TODOs
+notes.md
+.png
+.pbix
