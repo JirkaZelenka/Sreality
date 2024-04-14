@@ -5,9 +5,6 @@ import requests
 import re
 from typing import Optional
 
-import json
-import sqlite3
-
 class SrealityScraper:
     
     def __init__(self) -> None: 
@@ -25,11 +22,12 @@ class SrealityScraper:
         formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
         print(formatted_datetime)
 
-        base_url = "https://www.sreality.cz/api/cs/v2/estates?"
-        url_count = f"{base_url}/count" 
+        url_base = "https://www.sreality.cz/api/cs/v2/estates?"
+        url_count = f"https://www.sreality.cz/api/cs/v2/estates/count" 
         #TODO: nefunguje jim dobře počet na kombinovaném filtru, např byt + Prodej
 
-        result = requests.get(url_count).json()
+        with requests.Session() as session:
+            result =  session.request(method="GET", url=url_count).json()
         print(f"number of ALL estates (Byt, Dům, Pronájem, Prodej): {result['result_size']}")
 
         pages = (result["result_size"]//per_page) + 1
@@ -38,7 +36,7 @@ class SrealityScraper:
         urls = []
         for page in tqdm(range(1, pages+1)):
             #TODO: proč nestáhnout rovnou vše. Je to jen 6x tolik. 95k místo 17k. Zároveň rozdělující parametry jsou vždy v seo sekci
-            url = f"{base_url}"
+            url = f"{url_base}"
             if category_main_cb:
                 url += f"category_main_cb={category_main_cb}&"
             if category_type_cb:
@@ -55,8 +53,9 @@ class SrealityScraper:
         url_lengths = {}
         for url in tqdm(urls):
             
-            result = requests.get(url).json()
-
+            with requests.Session() as session:
+                result =  session.request(method="GET", url=url).json()
+        
             estates_per_page = 0
             
             try:
@@ -96,11 +95,6 @@ class SrealityScraper:
                 
         print(len(data))
         return data       
-    
-    
-    def data_to_df(self, data) -> pd.DataFrame:
-
-        return pd.DataFrame(data)
          
  
     
