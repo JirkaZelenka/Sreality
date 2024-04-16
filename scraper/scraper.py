@@ -4,11 +4,17 @@ from tqdm import tqdm
 import requests   
 import re
 from typing import Optional
+import os
+from dotenv import load_dotenv
+
 
 class SrealityScraper:
     
     def __init__(self) -> None: 
-        pass     
+        
+        load_dotenv()
+        self.project_path = os.getenv("project_path") 
+        self.data_folder = os.getenv("data_folder")  
 
     def run_scraping(self,
                     category_main_cb: Optional[int] = None, # 1 = Byt
@@ -96,5 +102,18 @@ class SrealityScraper:
         print(len(data))
         return data       
          
- 
+    def safe_save_csv(self, df, filename):
+
+        file_path = f"{self.project_path}/{self.data_folder}/{filename}.csv" 
+        
+        if os.path.exists(file_path):
+            print(f"Name {filename} in {file_path} already exists.")
+            filename += "_SAFE"
+            file_path = f"{self.project_path}/{self.data_folder}/{filename}.csv" 
+            df.to_csv(file_path, sep=";", encoding="utf-8")
+        
+        else:
+            print(f"Saving {filename} to {file_path}")
+            df.to_csv(file_path, sep=";", encoding="utf-8")
+
     
