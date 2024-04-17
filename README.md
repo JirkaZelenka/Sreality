@@ -12,3 +12,4 @@
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 * 7.1.2024 started rework of the scraper
 * 11.4.2024 extreme speed-up of getting offer details using different API call with filters
+* 14-17.4. complete table managment

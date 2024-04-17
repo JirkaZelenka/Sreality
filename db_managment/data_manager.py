@@ -4,75 +4,18 @@ import re
 
 import sqlite3
 import os
-from dotenv import load_dotenv
 
-
+from config import Config 
+ 
 class DataManager:
     
     def __init__(self) -> None: 
-        
-        load_dotenv()
-        self.project_path = os.getenv("project_path") 
-        self.db_name = os.getenv("db_name")
-        self.data_folder = os.getenv("data_folder")
-        self.type_of_building = os.getenv("type_of_building")
-        
-        
-        self.table_definitions ={
-            "batch_detail": 
-                    """ 
-                    CREATE TABLE IF NOT EXISTS batch_detail (
-                    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                    timestamp datetime NOT NULL,
-                    created_at datetime NOT NULL
-                    ); 
-                    """,
-                    
-            "estate_detail": 
-                    """ 
-                    CREATE TABLE IF NOT EXISTS estate_detail (
-                    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                    code VARCHAR(255) NOT NULL,
-                    name VARCHAR(255) NOT NULL,
-                    category_main_cb INTEGER NOT NULL,
-                    category_type_cb INTEGER NOT NULL,
-                    category_sub_cb INTEGER NOT NULL,
-                    type_of_building VARCHAR(255) NOT NULL,
-                    type_of_deal VARCHAR(255) NOT NULL,
-                    type_of_rooms VARCHAR(255) NOT NULL,
-                    size_meters FLOAT NOT NULL,
-                    locality VARCHAR(255) NOT NULL,
-                    region VARCHAR(255) NOT NULL,
-                    district VARCHAR(255) NOT NULL,
-                    latitude FLOAT NOT NULL,
-                    longitude FLOAT NOT NULL,
-                    first_update datetime NOT NULL,
-                    last_update datetime NOT NULL,
-                    first_price INTEGER NOT NULL,
-                    last_price INTEGER NOT NULL,
-                    max_price INTEGER NOT NULL,
-                    min_price INTEGER NOT NULL,
-                    created_at datetime NOT NULL
-                    ); 
-                    """,
-            "scraped_prices": 
-                    """ 
-                    CREATE TABLE IF NOT EXISTS scraped_prices (
-                    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                    estate_id INTEGER NOT NULL,
-                    batch_id INTEGER NOT NULL,
-                    price INTEGER NOT NULL,
-                    created_at datetime NOT NULL,
-                    FOREIGN KEY (estate_id) REFERENCES estate_detail (id),
-                    FOREIGN KEY (batch_id) REFERENCES batch_detail (id)
-                    ); 
-                    """                
-        }
+        self.cf = Config()      
         
     def _get_connection(self):
         
         try:
-            conn = sqlite3.connect(f"{self.project_path}/{self.db_name}")
+            conn = sqlite3.connect(f"{self.cf.project_path}/{self.cf.db_name}")
             return conn
         except sqlite3.Error as e:
             print("Error connecting to database:", e)
@@ -116,7 +59,7 @@ class DataManager:
         
         conn = self._get_connection()
         
-        table = self.table_definitions[table_name]
+        table = self.cf.table_definitions[table_name]
         try:
             cursor = conn.cursor()
             cursor.execute(table)
@@ -164,9 +107,9 @@ class DataManager:
                     category_main_cb, category_type_cb, category_sub_cb,
                     type_of_building, type_of_deal, type_of_rooms, 
                     size_meters, locality, region, district, latitude, longitude,
-                    first_date, last_date, first_price, last_price, max_price, min_price, created_at ) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                            ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    first_update, last_update, first_price, last_price, max_price, min_price, created_at ) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """             
             cursor.executemany(query, data_to_upload)
             conn.commit()
@@ -240,19 +183,19 @@ class DataManager:
         return df_new[~df_new["hash_id"].isin(all_estates)]
     
     def get_regions_and_districs(self):
-        pass
+        raise NotImplementedError
      
-    def translate_type_of_building(code):
-        pass
+    def translate_type_of_building(self, code_category_main_cb):
+        return self.cf.type_of_building[str(code_category_main_cb)]
     
-    def translate_type_of_deal(code):
-        pass
+    def translate_type_of_deal(self, code_category_type_cb):
+        return self.cf.type_of_deal[str(code_category_type_cb)]
     
-    def translate_type_of_rooms(code):
-        pass
+    def translate_type_of_rooms(self, code_category_sub_cb):
+        return self.cf.type_of_rooms[str(code_category_sub_cb)]
     
     def update_existing_estate(self):
         #TODO:
-        pass
+        raise NotImplementedError
     
 
