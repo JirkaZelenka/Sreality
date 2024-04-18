@@ -74,6 +74,14 @@ class DataManager:
         try:
             cursor = conn.cursor()
             
+            current_datetime = datetime.now()
+            formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+            
+            df["type_of_building"] = df["category_main_cb"].apply(self.translate_type_of_building)
+            df["type_of_deal"] = df["category_type_cb"].apply(self.translate_type_of_deal)
+            df["type_of_rooms"] = df["category_sub_cb"].apply(self.translate_type_of_building)
+
+            
             data_to_upload = []
             for i in range(len(df)):
                 r = df.iloc[i]
@@ -98,7 +106,7 @@ class DataManager:
                     r['price'],
                     r['price'],
                     r['price'],
-                    r["created_at"]
+                    formatted_datetime
                     ])
 
             query = f"""
@@ -125,11 +133,14 @@ class DataManager:
         conn = self._get_connection()
         try:
             cursor = conn.cursor()
+            
+            current_datetime = datetime.now()
+            formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
         
             data_to_upload = []
             for i in range(len(df)):
                 r = df.iloc[i]
-                data_to_upload.append([r['timestamp'], r["created_at"]])
+                data_to_upload.append([r['timestamp'], formatted_datetime])
                 
             query = f"""
                     INSERT INTO batch_detail (timestamp, created_at)
@@ -152,13 +163,16 @@ class DataManager:
             conn.execute("PRAGMA foreign_keys = ON")
             cursor = conn.cursor()
             
+            current_datetime = datetime.now()
+            formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+            
             data_to_upload = []
             for i in range(len(df)):
                 r = df.iloc[i]
                 data_to_upload.append([r['estate_id'],
                                        r["batch_id"],
                                        r["price"],
-                                       r["created_at"]
+                                       formatted_datetime
                                        ])
                 
             query = f"""
