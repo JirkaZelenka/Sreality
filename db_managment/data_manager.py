@@ -67,7 +67,25 @@ class DataManager:
             cursor.close()
         except sqlite3.Error as e:
             print("Error Creating table:", e)
+          
+    def process_new_estates(self, df):
+        """
+        Checks if estate codes are already existing in DB.
+        Translates info codes into descriptions.
+        Generates the data for all three tables (batch, estate, prices)
+        """
+                
+        df_all = self.get_all_rows("estate_detail")
+        all_estate_codes = set(df_all["code"])
+        
+        df = df[~df["hash_id"].isin(all_estate_codes)]
+        
+        df["type_of_building"] = df["category_main_cb"].apply(self.translate_type_of_building)
+        df["type_of_deal"] = df["category_type_cb"].apply(self.translate_type_of_deal)
+        df["type_of_rooms"] = df["category_sub_cb"].apply(self.translate_type_of_building)
+
             
+          
     def insert_new_estate(self, df):
         
         conn = self._get_connection()
@@ -77,10 +95,6 @@ class DataManager:
             current_datetime = datetime.now()
             formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
             
-            df["type_of_building"] = df["category_main_cb"].apply(self.translate_type_of_building)
-            df["type_of_deal"] = df["category_type_cb"].apply(self.translate_type_of_deal)
-            df["type_of_rooms"] = df["category_sub_cb"].apply(self.translate_type_of_building)
-
             
             data_to_upload = []
             for i in range(len(df)):
@@ -189,12 +203,6 @@ class DataManager:
             
         conn.close()
    
-    def filter_new_estates(self, df_new):
-        
-        df_all = self.get_all_rows("estate_detail")
-        all_estates = set(df_all["code"])
-        
-        return df_new[~df_new["hash_id"].isin(all_estates)]
     
     def get_regions_and_districs(self):
         raise NotImplementedError

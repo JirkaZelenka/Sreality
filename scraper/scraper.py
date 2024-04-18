@@ -13,17 +13,15 @@ class SrealityScraper:
     def __init__(self) -> None: 
         self.cf = Config()   
 
+    
     def run_scraping(self,
+                    timestamp: str,
                     category_main_cb: Optional[int] = None, # 1 = Byt
                     category_type_cb: Optional[int] = None, # 1 = Prodej
                     category_sub_cb: Optional[int] = None, # 2 = 1+kk
                     per_page: Optional[int] = 999, # 999 is max to display on one page
                     ) -> pd.DataFrame:  
    
-   
-        current_datetime = datetime.now()
-        formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
-        print(formatted_datetime)
 
         url_base = "https://www.sreality.cz/api/cs/v2/estates?"
         url_count = f"https://www.sreality.cz/api/cs/v2/estates/count" 
@@ -37,7 +35,7 @@ class SrealityScraper:
         print(f"we will scrape max {pages} pages with {per_page} results each")
 
         urls = []
-        for page in tqdm(range(1, pages+1)):
+        for page in range(1, pages+1):
             #TODO: proč nestáhnout rovnou vše. Je to jen 6x tolik. 95k místo 17k. Zároveň rozdělující parametry jsou vždy v seo sekci
             url = f"{url_base}"
             if category_main_cb:
@@ -53,17 +51,17 @@ class SrealityScraper:
         #TODO: není lepší si dočasně "uložit" těchto 29 stránek celých, a až pak je naloadovat, rozsekat, uložit (E-T-L) a pak zas dropnout? 
         #TODO ...než dělat to: for i in result["_embedded"]["estates"]
         data = []
-        url_lengths = {}
+        #url_lengths = {}
         for url in tqdm(urls):
             
             with requests.Session() as session:
                 result =  session.request(method="GET", url=url).json()
         
-            estates_per_page = 0
+            #estates_per_page = 0
             
             try:
                 for i in result["_embedded"]["estates"]:
-                    estates_per_page +=1
+                    #estates_per_page +=1
                     
                     d = {}
                     d["code"] = str(i["hash_id"])
@@ -87,30 +85,14 @@ class SrealityScraper:
                     d["longitude"] = i["gps"]["lon"]
                     
                     d["price"] = int(i["price"])
-                    d["timestamp"] = formatted_datetime
+                    d["timestamp"] = timestamp
                                 
                     data.append(d)
             except:
-                url_lengths[url] = 0
+                #url_lengths[url] = 0
                 continue
                 
-            url_lengths[url] = estates_per_page
-                
-        print(len(data))
+            #url_lengths[url] = estates_per_page  
         return data       
          
-    def safe_save_csv(self, df, filename):
-
-        file_path = f"{self.cf.project_path}/{self.cf.data_folder}/{filename}.csv" 
-        
-        if os.path.exists(file_path):
-            print(f"Name {filename} in {file_path} already exists.")
-            filename += "_SAFE"
-            file_path = f"{self.cf.project_path}/{self.cf.data_folder}/{filename}.csv" 
-            df.to_csv(file_path, sep=";", encoding="utf-8")
-        
-        else:
-            print(f"Saving {filename} to {file_path}")
-            df.to_csv(file_path, sep=";", encoding="utf-8")
-
     

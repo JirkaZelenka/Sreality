@@ -3,9 +3,11 @@
 .exe
 # Env variables such as path
 .env
+# venv = virtual environment
+venv
 # My personal notes and TODOs
 notes.md
 .png
 .pbix
-# data in progress
+# data collection - with exception of testing data?
 /data_*/
