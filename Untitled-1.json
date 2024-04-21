@@ -1,0 +1,25 @@
+
+
+ 'items': [{
+   'unit': 'za nemovitost'},
+
+
+  {'type': 'string', 'name': 'Poznámka k ceně', 'value': 'neplatíte provizi'},
+  {'type': 'string', 'name': 'ID zakázky', 'value': 'N18995'},
+  {'type': 'edited', 'name': 'Aktualizace', 'value': 'Včera', 'topped': False},
+  {'type': 'string', 'name': 'Stavba', 'value': 'Cihlová'},
+  {'type': 'string', 'name': 'Stav objektu', 'value': 'Novostavba'},
+  {'type': 'string', 'name': 'Vlastnictví', 'value': 'Osobní'},
+  {'type': 'string', 'name': 'Umístění objektu', 'value': 'Klidná část obce'},
+  {'type': 'string', 'name': 'Podlaží', 'value': '2. podlaží z celkem 5'},
+  {'unit': 'm2', 'type': 'area', 'name': 'Užitná plocha', 'value': '43'},
+  {'unit': 'm2', 'type': 'area', 'name': 'Plocha podlahová', 'value': '43'},
+
+  {'value_type': 'B',
+   'type': 'energy_efficiency_rating',
+   'name': 'Energetická náročnost budovy',
+   'value': 'Třída B - Velmi úsporná č. 78/2013 Sb. podle vyhlášky'},
+  {'type': 'boolean', 'name': 'Bezbariérový', 'value': True},
+  {'type': 'boolean', 'name': 'Výtah', 'value': True}],
+ 'is_topped': True,
+ 'locality_district_id': 46}

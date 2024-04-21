@@ -1,5 +1,6 @@
 from datetime import datetime
 import pandas as pd
+from tqdm import tqdm
 import re
 
 import sqlite3
@@ -68,59 +69,81 @@ class DataManager:
         except sqlite3.Error as e:
             print("Error Creating table:", e)
           
-    def process_new_estates(self, df):
+    def process_new_estates(self, df_new, timestamp):
         """
         Checks if estate codes are already existing in DB.
         Translates info codes into descriptions.
         Generates the data for all three tables (batch, estate, prices)
         """
-                
+        
+        print(f"Starting to process {len(df_new)} potentially new estates")
         df_all = self.get_all_rows("estate_detail")
         all_estate_codes = set(df_all["code"])
+        df_new["code"] = df_new["code"].astype(str)
         
-        df = df[~df["hash_id"].isin(all_estate_codes)]
+        ######## Inserting new offer ########
+        df = df_new[~df_new["code"].isin(all_estate_codes)].copy()
+        print(f"There are {len(df)} new estates to CREATE")
         
-        df["type_of_building"] = df["category_main_cb"].apply(self.translate_type_of_building)
         df["type_of_deal"] = df["category_type_cb"].apply(self.translate_type_of_deal)
-        df["type_of_rooms"] = df["category_sub_cb"].apply(self.translate_type_of_building)
+        df["type_of_building"] = df["category_main_cb"].apply(self.translate_type_of_building)
+        df["type_of_rooms"] = df["category_sub_cb"].apply(self.translate_type_of_rooms)
 
-            
+        df["check"] = df.apply(lambda row: 1 if row["type_of_rooms"] == row['rooms'] else 0, axis=1)
+        if len(df[(df["check"]==0) & 
+                  (df["rooms"] != "-")]) > 0:
+            raise ValueError("There might be mismatch between type of flat scraped and translated")
+        
+        #TODO: zapiš i batch a zapiš i cenu. Toto jsou "jen" nové estate_details
+        
+        self._insert_new_estate(df, timestamp)
+        print(f"DONE: processing new estates")
+        
+        ######## Updating existing offer ########
+        df_upd = df_new[df_new["code"].isin(all_estate_codes)].copy()
+        print(f"There are {len(df_upd)} estates to UPDATE")
+        
+        if len(df_upd) > 0:
+            self._update_estate(df_upd, df_all)
+            print(f"DONE: Updating existing estates")
+        else:
+            print(f"we do not update anything")
+        
           
-    def insert_new_estate(self, df):
+    def _insert_new_estate(self, df, timestamp):
         
         conn = self._get_connection()
         try:
             cursor = conn.cursor()
             
-            current_datetime = datetime.now()
-            formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
-            
-            
             data_to_upload = []
             for i in range(len(df)):
                 r = df.iloc[i]
                 data_to_upload.append([
-                    r['code'],
+                    str(r['code']),
                     r['name'],
-                    r['category_main_cb'], 
-                    r['category_type_cb'], 
-                    r['category_sub_cb'], 
+                    str(r['category_main_cb']), 
+                    str(r['category_type_cb']), 
+                    str(r['category_sub_cb']), 
                     r['type_of_building'], 
                     r['type_of_deal'], 
+                    # this is same or better compared to type_of_flat directly scraped
                     r['type_of_rooms'], 
                     r['size_meters'],
                     r['locality'],
-                    r['region'],
-                    r['district'],
+                    "region",
+                    "district",
+                    #r['region'],
+                    #r['district'],
                     r['latitude'],
                     r['longitude'],
-                    r["timestamp"],
-                    r["timestamp"],  ### last date = equals first date for now
-                    r['price'],      ### all prices are equal now.
-                    r['price'],
-                    r['price'],
-                    r['price'],
-                    formatted_datetime
+                    r["timestamp"],  
+                    r["timestamp"],  ### last date = equals first date for now ^^^
+                    str(r['price']),      ### all prices are equal now. vvv
+                    str(r['price']),
+                    str(r['price']),
+                    str(r['price']),
+                    timestamp
                     ])
 
             query = f"""
@@ -142,34 +165,48 @@ class DataManager:
             
         conn.close()
         
-    def insert_new_batch(self, df):
+    def _update_estate(self, df, df_all):
         
         conn = self._get_connection()
         try:
             cursor = conn.cursor()
             
-            current_datetime = datetime.now()
-            formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
-        
             data_to_upload = []
-            for i in range(len(df)):
+            for i in tqdm(range(len(df))):
                 r = df.iloc[i]
-                data_to_upload.append([r['timestamp'], formatted_datetime])
+
+                previous_offer = df_all[df_all["code"] == r['code']]
+                #print(f"dosavadní maximum: {previous_offer['max_price'].iloc[0]}, nová cena ke zvážení: {r['price']}")
+                max_price = max(previous_offer['max_price'].iloc[0], r['price'])
+                min_price = min(previous_offer['min_price'].iloc[0], r['price'])
+                #print(f"new max a min price: {max_price}, {min_price}")
                 
+                data_to_upload.append([
+                    r["timestamp"],  # last_update should be changed every time the estate occurs in a new batch. chronologically
+                    str(max_price),
+                    str(min_price),
+                    str(r['price']),
+                    str(r['code']), 
+                    ])
+
             query = f"""
-                    INSERT INTO batch_detail (timestamp, created_at)
-                    VALUES (?, ?)
-                    """
+                    UPDATE estate_detail SET 
+                        last_update = ?, 
+                        max_price = ?,
+                        min_price = ?,
+                        last_price = ?
+                    WHERE code = ?
+                    """          
             cursor.executemany(query, data_to_upload)
             conn.commit()
 
         except sqlite3.Error as e:
-            print("Error inserting offer:", e)
+            print("Error updating offer:", e)
             conn.rollback()
             
         conn.close()
     
-    def insert_new_price(self, df):
+    def insert_new_price(self, df, timestamp):
         
         conn = self._get_connection()
         try:
@@ -177,16 +214,13 @@ class DataManager:
             conn.execute("PRAGMA foreign_keys = ON")
             cursor = conn.cursor()
             
-            current_datetime = datetime.now()
-            formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
-            
             data_to_upload = []
             for i in range(len(df)):
                 r = df.iloc[i]
                 data_to_upload.append([r['estate_id'],
                                        r["batch_id"],
                                        r["price"],
-                                       formatted_datetime
+                                       timestamp
                                        ])
                 
             query = f"""
@@ -216,8 +250,8 @@ class DataManager:
     def translate_type_of_rooms(self, code_category_sub_cb):
         return self.cf.type_of_rooms[str(code_category_sub_cb)]
     
-    def update_existing_estate(self):
-        #TODO:
+    def process_all_files(self):
+        #TODO: přečte všechny soubory csv ve složce, podle jména = chronologcky, a nahraje.
         raise NotImplementedError
     
 

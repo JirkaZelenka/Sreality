@@ -10,6 +10,9 @@
 * 27.-28.4. Creating representative .ipynb files with comments
 * TO be Done: Many things, mentioned in the files (full automatization, reporting, historical prices via Insidero?, checks, better time estimates, GPS smoothing, better way to handle extreme values, ...)
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-* 7.1.2024 started rework of the scraper
-* 11.4.2024 extreme speed-up of getting offer details using different API call with filters
+* spring 2024: started rework of the scraper
+* 11.4. extreme speed-up of getting offer details using different API call with filters
 * 14-17.4. complete table managment
+* 18.4. config with db structures and code translations, Inserting and Updating Estate details
+* 19.4. Using header for request to get non-randomized data (Sreality destroy name, price, even GPS coordinates if header is default by python request library)
+* 20.4. Solved translation of GPS into Kraj-Okres-Město-Oblast

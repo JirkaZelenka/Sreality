@@ -11,19 +11,20 @@ class Config:
         self.db_name = os.getenv("db_name") 
         
         
+        # category_type_cb
+        self.type_of_deal={"1": "prodej",
+                        "2": "pronájem",
+                        "3": "dražba",
+                        "4": "prodej podílu",
+                        }
+        
         # category_main_cb
         self.type_of_building={"1": "byt",
                             "2": "dům",
                             "3": "pozemek",
                             "4": "komerční nemovitost a nebytový prostor",
-                            "5": "ostatní"
+                            "5": "ostatní",
                             }
-
-        # category_type_cb
-        self.type_of_deal={"1": "prodej",
-                        "2": "pronájem",
-                        "3": "dražba"
-                        }
 
         # category_sub_cb
         self.type_of_rooms={"1" : "N/A",
@@ -38,23 +39,16 @@ class Config:
                         "10": "5+kk",
                         "11": "5+1",
                         "12": "6 pokoju a vic",
-                        "16": "atypický",
+                        "16": "atypické",
                         "19": "stavební parcela",
                         "23": "zahrada" ,
                         "33": "chata" ,
                         "37": "rodinný" ,
-                        "39": "vila" }
+                        "39": "vila",
+                        "47": "pronájem pokoje"
+                        }
                 
         self.table_definitions={
-            "batch_detail": 
-                    """ 
-                    CREATE TABLE IF NOT EXISTS batch_detail (
-                    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                    timestamp datetime NOT NULL,
-                    created_at datetime NOT NULL
-                    ); 
-                    """,
-                    
             "estate_detail": 
                     """ 
                     CREATE TABLE IF NOT EXISTS estate_detail (
@@ -87,11 +81,9 @@ class Config:
                     CREATE TABLE IF NOT EXISTS scraped_prices (
                     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                     estate_id INTEGER NOT NULL,
-                    batch_id INTEGER NOT NULL,
                     price INTEGER NOT NULL,
-                    created_at datetime NOT NULL,
+                    crawled_at datetime NOT NULL,
                     FOREIGN KEY (estate_id) REFERENCES estate_detail (id),
-                    FOREIGN KEY (batch_id) REFERENCES batch_detail (id)
                     ); 
                     """                
         }
