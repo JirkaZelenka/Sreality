@@ -177,6 +177,9 @@ class SrealityScraper:
                 d["code"] = code
                 save_counter += 1
                 data.append(d)
+            
+        _, date_to_save = self.utils.generate_timestamp()    
+        self.utils.save_progress_json(data, date_to_save)
                 
         return data       
          
