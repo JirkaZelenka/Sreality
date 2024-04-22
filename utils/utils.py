@@ -105,7 +105,7 @@ class Utilities:
             codes_from_json = [str(item['code']) for item in data]
     
             codes_not_found = [x for x in codes_not_found if x not in codes_from_json]
-            print(f"len of codes not found after checking some file {len(codes_not_found)}")
+            print(f"len of codes not found after checking file {file_name}: {len(codes_not_found)}")
             
         print(f"Codes Not found: {len(codes_not_found)}")         
         

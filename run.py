@@ -12,6 +12,12 @@ from db_managment.data_manager import DataManager
 from utils.utils import Utilities
 from config import Config
 
+import logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(filename='scraping.log', encoding='utf-8', level=logging.INFO)
+#TODO logging: 1) variovat jméno loggeru? 2) odebrat timestampy extra 3) pořešit proč tam mám debug logy
+#TODO 4) zkontrolovat propis vnitřních logů z funkcí (až je přidám) 5) odebrat některé printy  6) víc úrovní logů než INFO
+
 class Runner:
     
     def __init__(self) -> None: 
@@ -28,37 +34,43 @@ class Runner:
         # get timestamp
         full_datetime, date_to_save = self.utils.generate_timestamp()
         print(f"timestamp: {full_datetime}")
+        logger.info(f"{full_datetime}: Starting a regular run")
         
         # scrape all with filter
         if scrape_prodej_byty:
+            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Running scraper for Prodeje - Byty')
             data_prodej_byty = self.scraper.scrape_all_with_filter(timestamp=full_datetime, category_main_cb=1,category_type_cb=1)
             df_data_prodej_byty = pd.DataFrame(data_prodej_byty)
             self.utils.safe_save_csv(df_data_prodej_byty, f"data_{date_to_save}")
         
         if scrape_all:
+            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Running scraper for All')
             data_all = self.scraper.scrape_all_with_filter(timestamp=full_datetime)
             df_data_all = pd.DataFrame(data_all)
             self.utils.safe_save_csv(df_data_all, f"data_all_{date_to_save}")
         
         
-        
         #TODO: for scrape_prodej_byty, resp for scrape_all ..
         # check existing code in DB. 
         if scrape_prodej_byty:
+            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Looking for new estates in Prodeje - Byty')
             df = df_data_prodej_byty.copy()
             existing_codes = self.data_manager.get_all_rows("estate_detail")["code"]
             df_codes = df["code"].unique()
             df_missing = [x for x in df_codes if x not in list(existing_codes)]
-            
+            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: There are {len(df_missing)} missing codes in DB')
             print(f"Missing codes: {len(df_missing)}")
             
             # If not in DB, check prepared JSON File
             df_missing = self.utils.compare_codes_to_existing_jsons(df_missing)
+            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: There are still {len(df_missing)} missing codes after JSON check')
             print(f"Still missing codes: {len(df_missing)}")
 
             # scrape details of missing esates
+            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Going to scrape missing estate details')
             new_estate_details = self.scraper.scrape_specific_estates(df_missing, full_datetime)
             
+            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Finished scraping missing estate details')
             return new_estate_details
         
             
