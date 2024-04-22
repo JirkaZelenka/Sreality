@@ -8,10 +8,13 @@ import os
 
 from config import Config
 
+from utils.utils import Utilities
+
 class SrealityScraper:
     
     def __init__(self) -> None: 
         self.cf = Config()   
+        self.utils = Utilities()
     
     def scrape_all_with_filter(self,
                     timestamp: str,
@@ -81,23 +84,27 @@ class SrealityScraper:
                     timestamp: str,
                     ):  
    
-        url_base = f"https://www.sreality.cz/api/cs/v2/estates"
-        
-        urls = []
-        for code in codes:
-            urls.append(f"{url_base}/{code}")
+        url_base = f"https://www.sreality.cz/api/cs/v2/estates"            
         
         # ! critical part to avoid data randomizing from Sreality
         headers = {"User-Agent": "Mozilla/5.0"}
     
         data = []
-        for url in tqdm(urls):
+        save_counter = 0
+        for code in tqdm(codes):
+            
+            if save_counter == 500:
+                _, date_to_save = self.utils.generate_timestamp()
+                self.utils.save_progress_json(data, date_to_save)
+                save_counter = 0
+            
+            url = f"{url_base}/{code}"
             
             with requests.Session() as session:
                 r = session.request(method="GET", url=url, headers=headers).json()
-                    
             try:
                 d = {}
+                d["code"] = str(r["recommendations_data"]["hash_id"])
                 d["description"] = str(r["text"]["value"])   
                 d["meta_description"] = str(r["meta_description"])     
                 #############               
@@ -135,11 +142,41 @@ class SrealityScraper:
                 d["garage"] = int(r["recommendations_data"]["garage"])
                 d["room_count_cb"] = int(r["recommendations_data"]["room_count_cb"])
                 d["energy_efficiency_rating_cb"] = int(r["recommendations_data"]["energy_efficiency_rating_cb"])
+                #############
+                for item in r["items"]:
+                    if item["name"] == "Poznámka k ceně":
+                        d["note_about_price"] = item["value"]
+                    elif item["name"] == "ID zakázky":
+                        d["id_of_order"] = item["value"]
+                    elif item["name"] == "Aktualizace":
+                        d["last_update"] = item["value"]
+                    elif item["name"] == "Stavba":
+                        d["material"] = item["value"]
+                    elif item["name"] == "Stav objektu":
+                        d["age_of_building"] = item["value"]
+                    elif item["name"] == "Vlastnictví":
+                        d["ownership_type"] = item["value"]
+                    elif item["name"] == "Podlaží":
+                        d["floor"] = item["value"]
+                    elif item["name"] == "Užitná plocha":
+                        d["usable_area"] = item["value"]
+                    elif item["name"] == "Plocha podlahová":
+                        d["floor_area"] = item["value"]
+                    elif item["name"] == "energy_efficiency_rating":
+                        d["energy_efficiency_rating"] = item["value"]
+                    elif item["name"] == "Bezbariérový":
+                        d["no_barriers"] = item["value"]
+                    elif item["name"] == "Datum zahájení prodeje":
+                        d["start_of_offer"] = item["value"]
                 ############# 
                 d["timestamp"] = timestamp
+                save_counter += 1
                 data.append(d)
             except:
-                continue
+                d = {}
+                d["code"] = code
+                save_counter += 1
+                data.append(d)
                 
         return data       
          

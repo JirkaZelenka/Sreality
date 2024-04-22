@@ -9,6 +9,11 @@ import os
 from config import Config 
  
 class DataManager:
+    """
+    All operations available on the daatabase tables.
+    Inserting new estate, updating estate info in estate_detail table.
+    Adding new prices to scraped_prices table.
+    """
     
     def __init__(self) -> None: 
         self.cf = Config()      
@@ -68,48 +73,7 @@ class DataManager:
             cursor.close()
         except sqlite3.Error as e:
             print("Error Creating table:", e)
-          
-    def process_new_estates(self, df_new, timestamp):
-        """
-        Checks if estate codes are already existing in DB.
-        Translates info codes into descriptions.
-        Generates the data for all three tables (batch, estate, prices)
-        """
-        
-        print(f"Starting to process {len(df_new)} potentially new estates")
-        df_all = self.get_all_rows("estate_detail")
-        all_estate_codes = set(df_all["code"])
-        df_new["code"] = df_new["code"].astype(str)
-        
-        ######## Inserting new offer ########
-        df = df_new[~df_new["code"].isin(all_estate_codes)].copy()
-        print(f"There are {len(df)} new estates to CREATE")
-        
-        df["type_of_deal"] = df["category_type_cb"].apply(self.translate_type_of_deal)
-        df["type_of_building"] = df["category_main_cb"].apply(self.translate_type_of_building)
-        df["type_of_rooms"] = df["category_sub_cb"].apply(self.translate_type_of_rooms)
-
-        df["check"] = df.apply(lambda row: 1 if row["type_of_rooms"] == row['rooms'] else 0, axis=1)
-        if len(df[(df["check"]==0) & 
-                  (df["rooms"] != "-")]) > 0:
-            raise ValueError("There might be mismatch between type of flat scraped and translated")
-        
-        #TODO: zapiš i batch a zapiš i cenu. Toto jsou "jen" nové estate_details
-        
-        self._insert_new_estate(df, timestamp)
-        print(f"DONE: processing new estates")
-        
-        ######## Updating existing offer ########
-        df_upd = df_new[df_new["code"].isin(all_estate_codes)].copy()
-        print(f"There are {len(df_upd)} estates to UPDATE")
-        
-        if len(df_upd) > 0:
-            self._update_estate(df_upd, df_all)
-            print(f"DONE: Updating existing estates")
-        else:
-            print(f"we do not update anything")
-        
-          
+                 
     def _insert_new_estate(self, df, timestamp):
         
         conn = self._get_connection()
@@ -238,20 +202,6 @@ class DataManager:
         conn.close()
    
     
-    def get_regions_and_districs(self):
-        raise NotImplementedError
-     
-    def translate_type_of_building(self, code_category_main_cb):
-        return self.cf.type_of_building[str(code_category_main_cb)]
-    
-    def translate_type_of_deal(self, code_category_type_cb):
-        return self.cf.type_of_deal[str(code_category_type_cb)]
-    
-    def translate_type_of_rooms(self, code_category_sub_cb):
-        return self.cf.type_of_rooms[str(code_category_sub_cb)]
-    
-    def process_all_files(self):
-        #TODO: přečte všechny soubory csv ve složce, podle jména = chronologcky, a nahraje.
-        raise NotImplementedError
+
     
 

@@ -16,3 +16,4 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 * 18.4. config with db structures and code translations, Inserting and Updating Estate details
 * 19.4. Using header for request to get non-randomized data (Sreality destroy name, price, even GPS coordinates if header is default by python request library)
 * 20.4. Solved translation of GPS into Kraj-Okres-Město-Oblast
+* 21.4. creating estate_detail check, individual scraper for missing estate details, change of estate_detail table structure
