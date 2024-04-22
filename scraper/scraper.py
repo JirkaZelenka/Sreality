@@ -134,7 +134,6 @@ class SrealityScraper:
                 d["cellar"] = int(r["recommendations_data"]["cellar"])
                 d["building_type"] = int(r["recommendations_data"]["building_type"])
                 d["object_kind"] = int(r["recommendations_data"]["object_kind"])
-                d["usable_area"] = int(r["recommendations_data"]["usable_area"])
                 d["ownership"] = int(r["recommendations_data"]["ownership"])
                 d["low_energy"] = int(r["recommendations_data"]["low_energy"])
                 d["easy_access"] = int(r["recommendations_data"]["easy_access"])

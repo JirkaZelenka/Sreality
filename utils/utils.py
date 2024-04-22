@@ -16,10 +16,8 @@ class Utilities:
     def __init__(self) -> None: 
         self.cf = Config()  
         
-    #TODO: this could go to some general class of utils, so could safe_save
     @staticmethod
     def generate_timestamp() -> str:
-        
         current_datetime = datetime.now()
         full_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
         date_to_save = current_datetime.strftime("%Y%m%d_%H%M")
@@ -40,35 +38,42 @@ class Utilities:
             df.to_csv(file_path, sep=";", encoding="utf-8", index=False)
     
     def get_location(self, lat: float, lon: float)-> str:
-
-        geolocator = Nominatim(timeout = 20, user_agent = "JZ_Sreality")   # Pomohlo změnit jméno, proti "Error 403" !!        
-        geo_input = ", ".join([str(lat), str(lon)])
-        result = str(geolocator.reverse(geo_input))
-                
-        return  result
+        try:
+            geolocator = Nominatim(timeout = 20, user_agent = "JZ_Sreality")   # Pomohlo změnit jméno, proti "Error 403" !!        
+            geo_input = ", ".join([str(lat), str(lon)])
+            return str(geolocator.reverse(geo_input))           
+        except:
+            return None
     
-    def parse_location(self, location: str) -> dict:
-        
-        items = location.split(",")
-        
-        if len(items) >= 7 and (items[-5].strip().startswith("okres") or
-                                items[-5].strip().startswith("obvod")):
-            oblast = items[-7].strip() if len(items) >= 7 else "-"
-            return {
-                "oblast": oblast,
-                "město": items[-6].strip(),
-                "okres": items[-5].strip(),
-                "kraj": items[-4].strip()
-            }
-        elif len(items) >= 6 and (items[-4].strip().startswith("okres") or
-                                items[-4].strip().startswith("obvod")):
-            return {
-                "oblast": "-" if len(items) < 7 else items[-6].strip(),
-                "město": items[-5].strip(),
-                "okres": items[-4].strip(),
-                "kraj": items[-3].strip()
-            }
-        else:
+    def parse_location(self, location: str) -> dict: 
+        try:
+            items = location.split(",")
+            
+            if len(items) >= 7 and (items[-5].strip().startswith("okres") or
+                                    items[-5].strip().startswith("obvod")):
+                oblast = items[-7].strip() if len(items) >= 7 else "-"
+                return {
+                    "oblast": oblast,
+                    "město": items[-6].strip(),
+                    "okres": items[-5].strip(),
+                    "kraj": items[-4].strip()
+                }
+            elif len(items) >= 6 and (items[-4].strip().startswith("okres") or
+                                    items[-4].strip().startswith("obvod")):
+                return {
+                    "oblast": "-" if len(items) < 7 else items[-6].strip(),
+                    "město": items[-5].strip(),
+                    "okres": items[-4].strip(),
+                    "kraj": items[-3].strip()
+                }
+            else:
+                return {
+                    "oblast": "-",
+                    "město": "-",
+                    "okres": "-",
+                    "kraj": "-"
+                }
+        except:
             return {
                 "oblast": "-",
                 "město": "-",
@@ -76,6 +81,13 @@ class Utilities:
                 "kraj": "-"
             }
      
+    def assign_location_to_df(self, df: pd.DataFrame) -> pd.DataFrame:
+        
+        df["locality_to_parse"] = df.apply(lambda row: self.get_location(row["locality_gps_lat"], row["locality_gps_lon"]), axis=1)
+        df[['locality', 'city', 'district', 'region']] = df['locality_to_parse'].apply(lambda x: pd.Series(self.parse_location(x)))
+
+        return df
+        
     def translate_type_of_building(self, code_category_main_cb):
         return self.cf.type_of_building[str(code_category_main_cb)]
     
@@ -117,7 +129,26 @@ class Utilities:
         # Save to JSON
         with open(file_path, 'w') as f:
             json.dump(files_with_code, f, indent=4)
+            
+    def prep_df_new_estates(self, file_name: str) -> pd.DataFrame:
+        
+        folder_with_jsons_files= f"{self.cf.project_path}/{self.cf.data_folder}/estate_details"
+        file_path = os.path.join(folder_with_jsons_files, file_name)
+
+        with open(file_path, 'r') as file:
+            data = json.load(file)  
+        
+        df = pd.DataFrame(data) 
+        
+        for c in ["note_about_price", "id_of_order", "last_update", "material",
+                  "age_of_building", "ownership_type", "floor", "usable_area",
+                  "floor_area", "energy_efficiency_rating", "no_barriers", "start_of_offer",
+                  ]:
+            if c not in df.columns:
+                df[c] = None
+            
+        return df                   
+
     
-    
-    def identify_suspicious_offers(self, df) -> pd.DataFrame:
+    def identify_suspicious_offers(self, df: pd.DataFrame) -> pd.DataFrame:
         raise NotImplementedError

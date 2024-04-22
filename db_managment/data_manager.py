@@ -85,39 +85,77 @@ class DataManager:
                 r = df.iloc[i]
                 data_to_upload.append([
                     str(r['code']),
-                    r['name'],
-                    str(r['category_main_cb']), 
-                    str(r['category_type_cb']), 
-                    str(r['category_sub_cb']), 
-                    r['type_of_building'], 
-                    r['type_of_deal'], 
-                    # this is same or better compared to type_of_flat directly scraped
-                    r['type_of_rooms'], 
-                    r['size_meters'],
-                    r['locality'],
-                    "region",
-                    "district",
-                    #r['region'],
-                    #r['district'],
-                    r['latitude'],
-                    r['longitude'],
-                    r["timestamp"],  
-                    r["timestamp"],  ### last date = equals first date for now ^^^
-                    str(r['price']),      ### all prices are equal now. vvv
-                    str(r['price']),
-                    str(r['price']),
-                    str(r['price']),
+                    str(r['description']),
+                    str(r['meta_description']),
+                    str(r['category_main_cb']),
+                    str(r['category_type_cb']),
+                    str(r['category_sub_cb']),
+                    str(r['broker_id']),
+                    str(r['broker_company']),
+                    str(r['furnished']),
+                    str(r['locality_gps_lat']),
+                    str(r['locality_gps_lon']),
+                    str(r['locality']), 
+                    str(r['city']), 
+                    str(r['district']), 
+                    str(r['region']),
+                    str(r['object_type']),
+                    str(r['parking_lots']),
+                    str(r['locality_street_id']),
+                    str(r['locality_district_id']),
+                    str(r['locality_ward_id']),
+                    str(r['locality_region_id']),
+                    str(r['locality_quarter_id']),
+                    str(r['locality_municipality_id']),
+                    str(r['locality_country_id']),
+                    str(r['terrace']),
+                    str(r['balcony']),
+                    str(r['loggia']),
+                    str(r['basin']),
+                    str(r['cellar']),
+                    str(r['building_type']),
+                    str(r['object_kind']),
+                    str(r['ownership']),
+                    str(r['low_energy']),
+                    str(r['easy_access']),
+                    str(r['building_condition']),
+                    str(r['garage']),
+                    str(r['room_count_cb']),
+                    str(r['energy_efficiency_rating_cb']),
+                    str(r['note_about_price']),
+                    str(r['id_of_order']),
+                    str(r['last_update']),
+                    str(r['material']),
+                    str(r['age_of_building']),
+                    str(r['ownership_type']),
+                    str(r['floor']),
+                    str(r['usable_area']),
+                    str(r['floor_area']),
+                    str(r['energy_efficiency_rating']),
+                    str(r['no_barriers']),
                     timestamp
                     ])
 
             query = f"""
                     INSERT INTO estate_detail (
-                    code, name, 
+                    code, description, meta_description,
                     category_main_cb, category_type_cb, category_sub_cb,
-                    type_of_building, type_of_deal, type_of_rooms, 
-                    size_meters, locality, region, district, latitude, longitude,
-                    first_update, last_update, first_price, last_price, max_price, min_price, created_at ) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                    broker_id, broker_company, furnished,
+                    latitude, longitude, locality, city, district, region,
+                    object_type, parking_lots, locality_street_id, locality_district_id,
+                    locality_ward_id, locality_region_id, locality_quarter_id,
+                    locality_municipality_id, locality_country_id, terrace, balcony,
+                    loggia, basin, cellar, building_type, object_kind,
+                    ownership, low_energy, easy_access, building_condition, garage,
+                    room_count_cb, energy_efficiency_rating_cb, note_about_price,
+                    id_of_order, last_update, material, age_of_building,
+                    ownership_type, floor, usable_area, floor_area,
+                    energy_efficiency_rating, no_barriers, created_at)
+                    
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
                             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """             
             cursor.executemany(query, data_to_upload)
@@ -129,6 +167,7 @@ class DataManager:
             
         conn.close()
         
+    #TODO: removing this as obsolete, no updates of estate_detail in terms of price
     def _update_estate(self, df, df_all):
         
         conn = self._get_connection()
@@ -182,15 +221,14 @@ class DataManager:
             for i in range(len(df)):
                 r = df.iloc[i]
                 data_to_upload.append([r['estate_id'],
-                                       r["batch_id"],
                                        r["price"],
                                        timestamp
                                        ])
                 
             query = f"""
                     INSERT INTO scraped_prices (
-                    estate_id, batch_id, price, created_at)
-                    VALUES (?, ?, ?, ?)
+                    estate_id, price, created_at)
+                    VALUES (?, ?, ?)
                     """
             cursor.executemany(query, data_to_upload)
             conn.commit()

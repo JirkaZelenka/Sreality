@@ -63,6 +63,10 @@ class Config:
                     furnished INTEGER NOT NULL,
                     latitude FLOAT NOT NULL,
                     longitude FLOAT NOT NULL,
+                    locality VARCHAR(255) NOT NULL,
+                    city VARCHAR(255) NOT NULL,
+                    district VARCHAR(255) NOT NULL,
+                    region VARCHAR(255) NOT NULL,
                     object_type INTEGER NOT NULL,
                     parking_lots INTEGER NOT NULL,
                     locality_street_id INTEGER NOT NULL,
@@ -79,7 +83,6 @@ class Config:
                     cellar INTEGER NOT NULL,
                     building_type INTEGER NOT NULL,
                     object_kind INTEGER NOT NULL,
-                    usable_area INTEGER NOT NULL,
                     ownership VARCHAR(255) NOT NULL,
                     low_energy INTEGER NOT NULL,
                     easy_access INTEGER NOT NULL,
@@ -96,12 +99,9 @@ class Config:
                     floor VARCHAR(255) NOT NULL,
                     usable_area INTEGER NOT NULL,
                     floor_area INTEGER NOT NULL,
-                    energy_efficiency_rating
+                    energy_efficiency_rating VARCHAR(255) NOT NULL,
                     no_barriers VARCHAR(255) NOT NULL,
                     start_of_offer VARCHAR(255) NOT NULL,
- 
-                    first_update datetime NOT NULL,
-                    last_update datetime NOT NULL,
                     created_at datetime NOT NULL
                     ); 
                     """,

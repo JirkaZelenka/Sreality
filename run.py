@@ -49,14 +49,12 @@ class Runner:
             df_data_all = pd.DataFrame(data_all)
             self.utils.safe_save_csv(df_data_all, f"data_all_{date_to_save}")
         
-        
         #TODO: for scrape_prodej_byty, resp for scrape_all ..
         # check existing code in DB. 
         if scrape_prodej_byty:
             logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Looking for new estates in Prodeje - Byty')
-            df = df_data_prodej_byty.copy()
             existing_codes = self.data_manager.get_all_rows("estate_detail")["code"]
-            df_codes = df["code"].unique()
+            df_codes = df_data_prodej_byty["code"].unique()
             df_missing = [x for x in df_codes if x not in list(existing_codes)]
             logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: There are {len(df_missing)} missing codes in DB')
             print(f"Missing codes: {len(df_missing)}")
@@ -70,15 +68,29 @@ class Runner:
             logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Going to scrape missing estate details')
             new_estate_details = self.scraper.scrape_specific_estates(df_missing, full_datetime)
             
-            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Finished scraping missing estate details')
-            return new_estate_details
-        
+            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Finished scraping missing estate details')        
             
-            # translate codes to descriptions, add locations, ...
+            # Add locality, city, region, district.
+            #TODO: instead of searching for some file with some timstamp in  name, use manually
+            #TODO but in future i need to load all old jsons and do the same - these are only new buildings
+            """df = self.utils.prep_df_new_estates()"""
             
+            df = pd.DataFrame(new_estate_details)
+            for c in ["note_about_price", "id_of_order", "last_update", "material",
+                  "age_of_building", "ownership_type", "floor", "usable_area",
+                  "floor_area", "energy_efficiency_rating", "no_barriers", "start_of_offer",
+                  ]:
+                if c not in df.columns:
+                    df[c] = None
+            
+            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Searching for Locality, City, Region, District')
+            #TODO: apply is not tqdm.( cant watch it
+            df = self.utils.assign_location_to_df(df)
+            
+            return df
             # Add new estates to DB
             
-            # Update eixsting estates in DB
+            # Update existing estates in DB
             
             # save all new prices to DB
             
@@ -121,3 +133,8 @@ class Runner:
             
         """
         ##
+        
+        
+        
+        
+        
