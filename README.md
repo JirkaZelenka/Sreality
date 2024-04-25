@@ -14,6 +14,8 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 * 11.4. extreme speed-up of getting offer details using different API call with filters
 * 14-17.4. complete table managment
 * 18.4. config with db structures and code translations, Inserting and Updating Estate details
-* 19.4. Using header for request to get non-randomized data (Sreality destroy name, price, even GPS coordinates if header is default by python request library)
+* 19.4. Dealing with randomized data bcs of missing header
 * 20.4. Solved translation of GPS into Kraj-Okres-Město-Oblast
 * 21.4. creating estate_detail check, individual scraper for missing estate details, change of estate_detail table structure
+* 23.4. downloaded details to all current offers, updating this db after each new scraping
+* 24.-25.4. applied logging, requirements.in and Makefile

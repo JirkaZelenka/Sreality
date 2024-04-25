@@ -1,0 +1,352 @@
+INFO:run:2024-04-22 11:00:10: Starting a regular run
+INFO:run:2024-04-22 11:00:10: Running scraper for Prodeje - Byty
+INFO:run:2024-04-22 11:01:42: Running scraper for All
+INFO:run:2024-04-22 11:05:38: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-22 11:05:38: There are 16994 missing codes in DB
+INFO:run:2024-04-22 11:05:41: There are still 58 missing codes after JSON check
+INFO:run:2024-04-22 11:05:41: Going to scrape missing estate details
+INFO:run:2024-04-22 11:06:16: Finished scraping missing estate details
+##################################
+INFO:run:2024-04-22 12:37:03: Starting a regular run
+INFO:run:2024-04-22 12:37:03: Running scraper for Prodeje - Byty
+INFO:run:2024-04-22 12:38:30: Running scraper for All
+INFO:run:2024-04-22 12:42:26: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-22 12:42:26: There are 17033 missing codes in DB
+INFO:run:2024-04-22 12:42:29: There are still 143 missing codes after JSON check
+INFO:run:2024-04-22 12:42:29: Going to scrape missing estate details
+##################################
+INFO:run:2024-04-22 12:51:05: Starting a regular run
+INFO:run:2024-04-22 12:51:05: Running scraper for Prodeje - Byty
+INFO:run:2024-04-22 12:52:50: Running scraper for All
+INFO:run:2024-04-22 12:57:08: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-22 12:57:14: There are 17035 missing codes in DB
+INFO:run:2024-04-22 12:57:23: There are still 149 missing codes after JSON check
+INFO:run:2024-04-22 12:57:23: Going to scrape missing estate details
+INFO:run:2024-04-22 12:58:54: Finished scraping missing estate details
+##################################
+INFO:run:2024-04-22 13:43:51: Starting a regular run
+INFO:run:2024-04-22 13:43:51: Running scraper for Prodeje - Byty
+INFO:run:2024-04-22 13:49:25: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-22 13:49:25: There are 17046 missing codes in DB
+INFO:run:2024-04-22 13:49:29: There are still 32 missing codes after JSON check
+INFO:run:2024-04-22 13:49:29: Going to scrape missing estate details
+INFO:run:2024-04-22 13:49:50: Finished scraping missing estate details
+##################################
+INFO:run:2024-04-22 14:49:17: Starting a regular run
+INFO:run:2024-04-22 14:49:17: Running scraper for Prodeje - Byty
+INFO:run:2024-04-22 14:50:57: Running scraper for All
+INFO:run:2024-04-22 14:55:02: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-22 14:55:02: There are 17050 missing codes in DB
+INFO:run:2024-04-22 14:55:05: There are still 46 missing codes after JSON check
+INFO:run:2024-04-22 14:55:05: Going to scrape missing estate details
+INFO:run:2024-04-22 14:55:36: Finished scraping missing estate details
+##################################
+INFO:run:2024-04-22 16:38:39: Starting a regular run
+INFO:run:2024-04-22 16:38:39: Running scraper for Prodeje - Byty
+INFO:run:2024-04-22 16:41:07: Running scraper for All
+INFO:run:2024-04-22 16:46:12: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-22 16:46:13: There are 17104 missing codes in DB
+INFO:run:2024-04-22 16:46:25: There are still 55 missing codes after JSON check
+INFO:run:2024-04-22 16:46:25: Going to scrape missing estate details
+INFO:run:2024-04-22 16:47:26: Finished scraping missing estate details
+##################################
+INFO:run:2024-04-22 21:09:22: Starting a regular run
+INFO:run:2024-04-22 21:09:22: Running scraper for Prodeje - Byty
+INFO:run:2024-04-22 21:11:31: Running scraper for All
+INFO:run:2024-04-22 21:16:05: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-22 21:16:05: There are 17137 missing codes in DB
+INFO:run:2024-04-22 21:16:14: There are still 64 missing codes after JSON check
+INFO:run:2024-04-22 21:16:14: Going to scrape missing estate details
+INFO:run:2024-04-22 21:17:22: Finished scraping missing estate details
+##################################
+INFO:run:2024-04-22 22:54:35: Starting a regular run
+INFO:run:2024-04-22 22:54:35: Running scraper for Prodeje - Byty
+INFO:run:2024-04-22 22:56:11: Running scraper for All
+INFO:run:2024-04-22 22:59:53: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-22 22:59:53: There are 17158 missing codes in DB
+INFO:run:2024-04-22 22:59:57: There are still 28 missing codes after JSON check
+INFO:run:2024-04-22 22:59:57: Going to scrape missing estate details
+INFO:run:2024-04-22 23:00:13: Finished scraping missing estate details
+##################################
+INFO:run:2024-04-22 23:52:03: Starting a regular run
+INFO:run:2024-04-22 23:52:03: Running scraper for Prodeje - Byty
+INFO:run:2024-04-22 23:54:22: Running scraper for All
+INFO:run:2024-04-22 23:58:55: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-22 23:58:55: There are 17173 missing codes in DB
+INFO:run:2024-04-22 23:59:03: There are still 19 missing codes after JSON check
+INFO:run:2024-04-22 23:59:03: Going to scrape missing estate details
+INFO:run:2024-04-22 23:59:21: Finished scraping missing estate details
+INFO:run:2024-04-22 23:59:21: Searching for Locality, City, Region, District
+##################################
+INFO:run:2024-04-23 08:39:57: Starting a regular run
+INFO:run:2024-04-23 08:39:57: Running scraper for Prodeje - Byty
+INFO:run:2024-04-23 08:41:36: Running scraper for All
+INFO:run:2024-04-23 08:45:27: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-23 08:45:27: There are 17068 missing codes in DB
+INFO:run:2024-04-23 08:45:33: There are still 33 missing codes after JSON check
+INFO:run:2024-04-23 08:45:33: Going to scrape missing estate details
+INFO:run:2024-04-23 08:45:55: Finished scraping missing estate details
+INFO:run:2024-04-23 08:45:56: Searching for Locality, City, Region, District
+##################################
+INFO:run:2024-04-23 09:05:19: Starting a regular run
+INFO:run:2024-04-23 09:05:19: Running scraper for All
+INFO:run:2024-04-23 09:09:20: Looking for new estates - ALL
+INFO:run:2024-04-23 09:12:41: Starting a regular run
+INFO:run:2024-04-23 09:12:41: Running scraper for All
+INFO:run:2024-04-23 09:16:24: Looking for new estates - ALL
+INFO:run:2024-04-23 09:16:24: There are 59898 missing codes in DB
+INFO:run:2024-04-23 09:16:49: There are still 47646 missing codes after JSON check
+INFO:run:2024-04-23 09:16:49: Going to scrape missing estate details for ALL
+##################################
+INFO:run:2024-04-23 10:10:02: Starting a regular run
+INFO:run:2024-04-23 10:10:02: Running scraper for All
+INFO:run:2024-04-23 10:14:39: Looking for new estates - ALL
+INFO:run:2024-04-23 10:14:39: There are 59932 missing codes in DB
+INFO:run:2024-04-23 10:15:22: There are still 47716 missing codes after JSON check
+INFO:run:2024-04-23 10:15:22: Going to scrape missing estate details for ALL
+##################################
+INFO:run:2024-04-23 13:07:10: Starting a regular run
+INFO:run:2024-04-23 13:07:10: Running scraper for Prodeje - Byty
+INFO:run:2024-04-23 13:08:40: Running scraper for All
+INFO:run:2024-04-23 13:12:34: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-23 13:12:34: There are 17118 missing codes in DB
+INFO:run:2024-04-23 13:12:39: There are still 96 missing codes after JSON check
+INFO:run:2024-04-23 13:12:39: Going to scrape missing estate details
+INFO:run:2024-04-23 13:13:30: Finished scraping missing estate details
+INFO:run:2024-04-23 13:13:30: Searching for Locality, City, Region, District
+INFO:run:2024-04-23 13:14:12: Finished preparing dataset for upload to DB
+INFO:run:2024-04-23 13:14:12: Looking for new estates - ALL
+INFO:run:2024-04-23 13:14:12: There are 59921 missing codes in DB
+INFO:run:2024-04-23 13:14:50: There are still 41255 missing codes after JSON check
+INFO:run:2024-04-23 13:14:50: Going to scrape missing estate details for ALL
+##################################
+INFO:run:2024-04-23 14:27:48: Starting a regular run
+INFO:run:2024-04-23 14:27:48: Running scraper for Prodeje - Byty
+INFO:run:2024-04-23 14:29:23: Running scraper for All
+INFO:run:2024-04-23 14:33:09: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-23 14:33:09: There are 17114 missing codes in DB
+INFO:run:2024-04-23 14:33:13: There are still 33 missing codes after JSON check
+INFO:run:2024-04-23 14:33:13: Going to scrape missing estate details
+INFO:run:2024-04-23 14:33:32: Finished scraping missing estate details
+INFO:run:2024-04-23 14:33:32: Searching for Locality, City, Region, District
+INFO:run:2024-04-23 14:33:48: Finished preparing dataset for upload to DB
+INFO:run:2024-04-23 14:33:48: Looking for new estates - ALL
+INFO:run:2024-04-23 14:33:48: There are 59940 missing codes in DB
+INFO:run:2024-04-23 14:34:17: There are still 37293 missing codes after JSON check
+INFO:run:2024-04-23 14:34:17: Going to scrape missing estate details for ALL
+##################################
+INFO:run:2024-04-23 21:33:13: Starting a regular run
+INFO:run:2024-04-23 21:33:13: Running scraper for Prodeje - Byty
+INFO:run:2024-04-23 21:36:07: Running scraper for All
+INFO:run:2024-04-23 21:40:59: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-23 21:40:59: There are 17206 missing codes in DB
+INFO:run:2024-04-23 21:41:11: There are still 171 missing codes after JSON check
+INFO:run:2024-04-23 21:41:11: Going to scrape missing estate details
+INFO:run:2024-04-23 21:43:59: Finished scraping missing estate details
+INFO:run:2024-04-23 21:43:59: Searching for Locality, City, Region, District
+INFO:run:2024-04-23 21:45:15: Finished preparing dataset for upload to DB
+INFO:run:2024-04-23 21:45:15: Looking for new estates - ALL
+INFO:run:2024-04-23 21:45:15: There are 59940 missing codes in DB
+INFO:run:2024-04-23 21:46:29: There are still 26433 missing codes after JSON check
+INFO:run:2024-04-23 21:46:29: Going to scrape missing estate details for ALL
+##################################
+INFO:run:2024-04-24 01:14:09: Starting a regular run
+INFO:run:2024-04-24 01:14:09: Running scraper for Prodeje - Byty
+INFO:run:2024-04-24 01:16:01: Running scraper for All
+INFO:run:2024-04-24 01:19:52: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-24 01:19:52: There are 16963 missing codes in DB
+INFO:run:2024-04-24 01:20:04: There are still 30 missing codes after JSON check
+INFO:run:2024-04-24 01:20:04: Going to scrape missing estate details
+INFO:run:2024-04-24 01:20:25: Finished scraping missing estate details
+INFO:run:2024-04-24 01:20:25: Searching for Locality, City, Region, District
+INFO:run:2024-04-24 01:20:38: Finished preparing dataset for upload to DB
+INFO:run:2024-04-24 01:20:38: Looking for new estates - ALL
+INFO:run:2024-04-24 01:20:39: There are 59875 missing codes in DB
+INFO:run:2024-04-24 01:21:45: There are still 17930 missing codes after JSON check
+INFO:run:2024-04-24 01:21:45: Going to scrape missing estate details for ALL
+##################################
+INFO:run:2024-04-24 08:48:15: Starting a regular run
+INFO:run:2024-04-24 08:48:15: Running scraper for Prodeje - Byty
+INFO:run:2024-04-24 08:50:27: Running scraper for All
+INFO:run:2024-04-24 08:54:21: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-24 08:54:21: There are 17009 missing codes in DB
+INFO:run:2024-04-24 08:54:27: There are still 12 missing codes after JSON check
+INFO:run:2024-04-24 08:54:27: Going to scrape missing estate details
+INFO:run:2024-04-24 08:54:34: Finished scraping missing estate details
+INFO:run:2024-04-24 08:54:34: Searching for Locality, City, Region, District
+INFO:run:2024-04-24 08:54:39: Finished preparing dataset for upload to DB
+INFO:run:2024-04-24 08:54:39: Looking for new estates - ALL
+INFO:run:2024-04-24 08:54:39: There are 59940 missing codes in DB
+INFO:run:2024-04-24 08:55:19: There are still 7838 missing codes after JSON check
+INFO:run:2024-04-24 08:55:19: Going to scrape missing estate details for ALL
+INFO:run:2024-04-24 10:29:19: Finished scraping missing estate details for ALL
+INFO:run:2024-04-24 10:29:20: Searching for Locality, City, Region, District
+##################################
+INFO:run:2024-04-24 10:56:05: Starting a regular run
+INFO:run:2024-04-24 10:56:05: Running scraper for Prodeje - Byty
+INFO:run:2024-04-24 10:57:37: Running scraper for All
+INFO:run:2024-04-24 11:01:31: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-24 11:01:31: There are 17041 missing codes in DB
+INFO:run:2024-04-24 11:01:37: There are still 33 missing codes after JSON check
+INFO:run:2024-04-24 11:01:37: Going to scrape missing estate details
+INFO:run:2024-04-24 11:01:58: Finished scraping missing estate details
+INFO:run:2024-04-24 11:01:58: Looking for new estates - ALL
+INFO:run:2024-04-24 11:01:59: There are 59924 missing codes in DB
+INFO:run:2024-04-24 11:02:40: There are still 261 missing codes after JSON check
+INFO:run:2024-04-24 11:02:40: Going to scrape missing estate details for ALL
+INFO:run:2024-04-24 11:05:25: Finished scraping missing estate details for ALL
+##################################
+INFO:run:2024-04-24 13:00:47: Starting a regular run
+INFO:run:2024-04-24 13:00:47: Running scraper for Prodeje - Byty
+INFO:run:2024-04-24 13:02:28: Running scraper for All
+INFO:run:2024-04-24 13:07:09: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-24 13:07:10: There are 17078 missing codes in DB
+INFO:run:2024-04-24 13:07:25: There are still 55 missing codes after JSON check
+INFO:run:2024-04-24 13:07:25: Going to scrape missing estate details
+INFO:run:2024-04-24 13:08:25: Finished scraping missing estate details
+INFO:run:2024-04-24 13:08:25: Looking for new estates - ALL
+INFO:run:2024-04-24 13:08:26: There are 59884 missing codes in DB
+INFO:run:2024-04-24 13:10:20: There are still 274 missing codes after JSON check
+INFO:run:2024-04-24 13:10:20: Going to scrape missing estate details for ALL
+INFO:run:2024-04-24 13:15:12: Finished scraping missing estate details for ALL
+##################################
+INFO:run:2024-04-24 15:50:04: Starting a regular run
+INFO:run:2024-04-24 15:50:04: Running scraper for Prodeje - Byty
+INFO:run:2024-04-24 15:51:50: Running scraper for All
+INFO:run:2024-04-24 15:55:54: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-24 15:55:55: There are 17111 missing codes in DB
+INFO:run:2024-04-24 15:56:12: There are still 54 missing codes after JSON check
+INFO:run:2024-04-24 15:56:13: Going to scrape missing estate details
+INFO:run:2024-04-24 15:57:00: Finished scraping missing estate details
+INFO:run:2024-04-24 15:57:00: Looking for new estates - ALL
+INFO:run:2024-04-24 15:57:02: There are 59300 missing codes in DB
+INFO:run:2024-04-24 15:58:05: There are still 301 missing codes after JSON check
+INFO:run:2024-04-24 15:58:05: Going to scrape missing estate details for ALL
+INFO:run:2024-04-24 16:02:01: Finished scraping missing estate details for ALL
+##################################
+INFO:run:2024-04-24 23:19:52: Starting a regular run
+INFO:run:2024-04-24 23:19:52: Running scraper for Prodeje - Byty
+INFO:run:2024-04-24 23:22:19: Running scraper for All
+INFO:run:2024-04-24 23:28:06: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-24 23:28:06: There are 17148 missing codes in DB
+INFO:run:2024-04-24 23:28:25: There are still 111 missing codes after JSON check
+INFO:run:2024-04-24 23:28:25: Going to scrape missing estate details
+INFO:run:2024-04-24 23:30:31: Finished scraping missing estate details
+INFO:run:2024-04-24 23:30:31: Looking for new estates - ALL
+INFO:run:2024-04-24 23:30:31: There are 59936 missing codes in DB
+INFO:run:2024-04-24 23:32:29: There are still 359 missing codes after JSON check
+INFO:run:2024-04-24 23:32:29: Going to scrape missing estate details for ALL
+INFO:run:2024-04-24 23:39:06: Finished scraping missing estate details for ALL
+##################################
+INFO:run:2024-04-25 08:58:11: Starting a regular run
+INFO:run:2024-04-25 08:58:11: Running scraper for Prodeje - Byty
+INFO:run:2024-04-25 08:59:57: Running scraper for All
+INFO:run:2024-04-25 09:04:13: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-25 09:04:13: There are 17017 missing codes in DB
+INFO:run:2024-04-25 09:04:29: There are still 26 missing codes after JSON check
+INFO:run:2024-04-25 09:04:29: Going to scrape missing estate details
+INFO:run:2024-04-25 09:04:58: Finished scraping missing estate details
+INFO:run:2024-04-25 09:04:58: Looking for new estates - ALL
+INFO:run:2024-04-25 09:04:59: There are 59938 missing codes in DB
+INFO:run:2024-04-25 09:06:59: There are still 112 missing codes after JSON check
+INFO:run:2024-04-25 09:06:59: Going to scrape missing estate details for ALL
+INFO:run:2024-04-25 09:08:56: Finished scraping missing estate details for ALL
+##################################
+INFO:run:2024-04-25 10:18:34: Starting a regular run
+INFO:run:2024-04-25 10:18:34: Running scraper for Prodeje - Byty
+INFO:run:2024-04-25 10:20:54: Running scraper for All
+INFO:run:2024-04-25 10:25:37: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-25 10:25:37: There are 17019 missing codes in DB
+INFO:run:2024-04-25 10:25:54: There are still 24 missing codes after JSON check
+INFO:run:2024-04-25 10:25:54: Going to scrape missing estate details
+INFO:run:2024-04-25 10:26:21: Finished scraping missing estate details
+INFO:run:2024-04-25 10:26:21: Looking for new estates - ALL
+INFO:run:2024-04-25 10:26:21: There are 59930 missing codes in DB
+INFO:run:2024-04-25 10:28:32: There are still 153 missing codes after JSON check
+INFO:run:2024-04-25 10:28:32: Going to scrape missing estate details for ALL
+INFO:run:2024-04-25 10:31:06: Finished scraping missing estate details for ALL
+##################################
+INFO:run:2024-04-25 13:36:58: Starting a regular run
+INFO:run:2024-04-25 13:36:58: Running scraper for Prodeje - Byty
+INFO:run:2024-04-25 13:38:37: Running scraper for All
+INFO:run:2024-04-25 13:42:27: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-25 13:42:27: There are 17055 missing codes in DB
+INFO:run:2024-04-25 13:42:33: There are still 80 missing codes after JSON check
+INFO:run:2024-04-25 13:42:33: Going to scrape missing estate details
+INFO:run:2024-04-25 13:43:27: Finished scraping missing estate details
+INFO:run:2024-04-25 13:43:27: Looking for new estates - ALL
+INFO:run:2024-04-25 13:43:28: There are 59939 missing codes in DB
+INFO:run:2024-04-25 13:44:19: There are still 321 missing codes after JSON check
+INFO:run:2024-04-25 13:44:19: Going to scrape missing estate details for ALL
+INFO:run:2024-04-25 13:48:12: Finished scraping missing estate details for ALL
+##################################
+INFO:run:2024-04-25 15:38:07: Starting a regular run
+INFO:run:2024-04-25 15:38:07: Running scraper for Prodeje - Byty
+INFO:run:2024-04-25 15:39:38: Running scraper for All
+INFO:run:2024-04-25 15:43:26: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-25 15:43:26: There are 17073 missing codes in DB
+INFO:run:2024-04-25 15:43:32: There are still 47 missing codes after JSON check
+INFO:run:2024-04-25 15:43:32: Going to scrape missing estate details
+INFO:run:2024-04-25 15:43:59: Finished scraping missing estate details
+INFO:run:2024-04-25 15:43:59: Looking for new estates - ALL
+INFO:run:2024-04-25 15:43:59: There are 59940 missing codes in DB
+INFO:run:2024-04-25 15:44:36: There are still 186 missing codes after JSON check
+INFO:run:2024-04-25 15:44:36: Going to scrape missing estate details for ALL
+INFO:run:2024-04-25 15:46:31: Finished scraping missing estate details for ALL
+##################################
+INFO:run:2024-04-25 16:47:12: Starting a regular run
+INFO:run:2024-04-25 16:47:12: Running scraper for Prodeje - Byty
+INFO:run:2024-04-25 16:49:24: Running scraper for All
+INFO:run:2024-04-25 16:53:49: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-25 16:53:50: There are 17071 missing codes in DB
+INFO:run:2024-04-25 16:54:02: There are still 17 missing codes after JSON check
+INFO:run:2024-04-25 16:54:02: Going to scrape missing estate details
+INFO:run:2024-04-25 16:54:17: Finished scraping missing estate details
+INFO:run:2024-04-25 16:54:17: Looking for new estates - ALL
+INFO:run:2024-04-25 16:54:17: There are 59883 missing codes in DB
+INFO:run:2024-04-25 16:55:30: There are still 90 missing codes after JSON check
+INFO:run:2024-04-25 16:55:30: Going to scrape missing estate details for ALL
+INFO:run:2024-04-25 16:56:45: Finished scraping missing estate details for ALL
+##################################
+INFO:run:2024-04-25 20:19:58: Starting a regular run
+INFO:run:2024-04-25 20:19:58: Running scraper for Prodeje - Byty
+INFO:run:2024-04-25 20:22:26: Running scraper for All
+INFO:run:2024-04-25 20:26:59: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-25 20:27:00: There are 17081 missing codes in DB
+INFO:run:2024-04-25 20:27:15: There are still 48 missing codes after JSON check
+INFO:run:2024-04-25 20:27:15: Going to scrape missing estate details
+INFO:run:2024-04-25 20:28:05: Finished scraping missing estate details
+INFO:run:2024-04-25 20:28:05: Looking for new estates - ALL
+INFO:run:2024-04-25 20:28:05: There are 59925 missing codes in DB
+INFO:run:2024-04-25 20:29:51: There are still 194 missing codes after JSON check
+INFO:run:2024-04-25 20:29:51: Going to scrape missing estate details for ALL
+INFO:run:2024-04-25 20:33:20: Finished scraping missing estate details for ALL
+##################################
+INFO:run:2024-04-25 23:39:45: Starting a regular run
+INFO:run:2024-04-25 23:39:45: Running scraper for Prodeje - Byty
+INFO:run:2024-04-25 23:41:26: Running scraper for All
+INFO:run:2024-04-25 23:45:08: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-25 23:45:09: There are 17084 missing codes in DB
+INFO:run:2024-04-25 23:45:16: There are still 23 missing codes after JSON check
+INFO:run:2024-04-25 23:45:16: Going to scrape missing estate details
+INFO:run:2024-04-25 23:45:30: Finished scraping missing estate details
+INFO:run:2024-04-25 23:45:30: Looking for new estates - ALL
+INFO:run:2024-04-25 23:45:30: There are 59940 missing codes in DB
+INFO:run:2024-04-25 23:46:14: There are still 90 missing codes after JSON check
+INFO:run:2024-04-25 23:46:14: Going to scrape missing estate details for ALL
+INFO:run:2024-04-25 23:47:12: Finished scraping missing estate details for ALL
+##################################
+
+INFO:run:2024-04-26 00:17:24: Starting a regular run
+INFO:run:2024-04-26 00:17:24: Running scraper for Prodeje - Byty
+INFO:run:2024-04-26 00:18:58: Running scraper for All
+INFO:run:2024-04-26 00:22:37: Looking for new estates in Prodeje - Byty
+INFO:run:2024-04-26 00:22:37: There are 17083 missing codes in DB
+INFO:run:2024-04-26 00:22:44: There are still 3 missing codes after JSON check
+INFO:run:2024-04-26 00:22:44: Going to scrape missing estate details
+INFO:run:2024-04-26 00:22:46: Finished scraping missing estate details
+INFO:run:2024-04-26 00:22:46: Looking for new estates - ALL
+INFO:run:2024-04-26 00:22:47: There are 59937 missing codes in DB
+INFO:run:2024-04-26 00:23:25: There are still 19 missing codes after JSON check
+INFO:run:2024-04-26 00:23:25: Going to scrape missing estate details for ALL
+INFO:run:2024-04-26 00:23:37: Finished scraping missing estate details for ALL
