@@ -9,7 +9,7 @@ import json
 os.chdir("c:\\Users\\jirka\\Documents\\MyProjects\\Sreality")
 from scraper.scraper import SrealityScraper
 from db_managment.data_manager import DataManager
-from utils.utils import Utilities
+from utils.utils import Utilities, GeoData
 from config import Config
 
 import logging
@@ -25,8 +25,9 @@ class Runner:
         self.scraper = SrealityScraper()
         self.data_manager = DataManager()
         self.utils = Utilities()
+        self.geodata = GeoData()
         
-    def regular_run(self,
+    def scrape_and_update_run(self,
                     scrape_prodej_byty: Optional[bool] = True,
                     scrape_all: Optional[bool] = True
                     ) -> pd.DataFrame:
@@ -53,88 +54,103 @@ class Runner:
         # check existing code in DB. 
         if scrape_prodej_byty:
             logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Looking for new estates in Prodeje - Byty')
-            existing_codes = self.data_manager.get_all_rows("estate_detail")["code"]
-            df_codes = df_data_prodej_byty["code"].unique()
-            df_missing = [x for x in df_codes if x not in list(existing_codes)]
+            existing_codes = set(self.data_manager.get_all_rows("estate_detail")["code"])
+            df_codes = set(df_data_prodej_byty["code"].unique())
+            
+            #df_missing = [x for x in df_codes if x not in list(existing_codes)]
+            df_missing = df_codes - existing_codes
             logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: There are {len(df_missing)} missing codes in DB')
-            print(f"Missing codes: {len(df_missing)}")
             
             # If not in DB, check prepared JSON File
             df_missing = self.utils.compare_codes_to_existing_jsons(df_missing)
             logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: There are still {len(df_missing)} missing codes after JSON check')
             print(f"Still missing codes: {len(df_missing)}")
 
-            # scrape details of missing esates
-            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Going to scrape missing estate details')
-            new_estate_details = self.scraper.scrape_specific_estates(df_missing, full_datetime)
+            # ? this handles the case when empty JSON would be created and not read by GeoData
+            if len(df_missing) > 0:
+                # scrape details of missing esates
+                logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Going to scrape missing estate details')
+                new_estate_details = self.scraper.scrape_specific_estates(df_missing, full_datetime)
+                logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Finished scraping missing estate details')        
+            else:
+                logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: No need to scrape missing estate details')             
             
-            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Finished scraping missing estate details')        
-            
-            # Add locality, city, region, district.
-            #TODO: instead of searching for some file with some timstamp in  name, use manually
-            #TODO but in future i need to load all old jsons and do the same - these are only new buildings
-            """df = self.utils.prep_df_new_estates()"""
-            
-            df = pd.DataFrame(new_estate_details)
-            for c in ["note_about_price", "id_of_order", "last_update", "material",
-                  "age_of_building", "ownership_type", "floor", "usable_area",
-                  "floor_area", "energy_efficiency_rating", "no_barriers", "start_of_offer",
-                  ]:
-                if c not in df.columns:
-                    df[c] = None
-            
-            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Searching for Locality, City, Region, District')
-            #TODO: apply is not tqdm.( cant watch it
-            df = self.utils.assign_location_to_df(df)
-            
-            return df
-            # Add new estates to DB
-            
-            # Update existing estates in DB
-            
-            # save all new prices to DB
-            
-            # create LOG file
+        # TODO: deduplicate this section, the only difference is data_all vs df_data_prodej_byty
+        # TODO: and saving file name maybe?
+        #todo: or simply just run one function twice, based on argument there will be file_name.
         
-        
-        """
-        print(f"Starting to process {len(df_new)} potentially new estates")
-        df_all = self.get_all_rows("estate_detail")
-        all_estate_codes = set(df_all["code"])
-        df_new["code"] = df_new["code"].astype(str)
-        
-        ######## Inserting new offer ########
-        df = df_new[~df_new["code"].isin(all_estate_codes)].copy()
-        print(f"There are {len(df)} new estates to CREATE")
-        
-        df["type_of_deal"] = df["category_type_cb"].apply(self.translate_type_of_deal)
-        df["type_of_building"] = df["category_main_cb"].apply(self.translate_type_of_building)
-        df["type_of_rooms"] = df["category_sub_cb"].apply(self.translate_type_of_rooms)
+        if scrape_all:
+            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Looking for new estates - ALL')
+            existing_codes = set(self.data_manager.get_all_rows("estate_detail")["code"])
+            df_codes = set(df_data_all["code"].unique())
+            
+            #df_missing = [x for x in df_codes if x not in list(existing_codes)]
+            df_missing = df_codes - existing_codes
+            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: There are {len(df_missing)} missing codes in DB')
+            
+            # If not in DB, check prepared JSON File
+            df_missing = self.utils.compare_codes_to_existing_jsons(df_missing)
+            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: There are still {len(df_missing)} missing codes after JSON check')
+            print(f"Still missing codes: {len(df_missing)}")
 
-        df["check"] = df.apply(lambda row: 1 if row["type_of_rooms"] == row['rooms'] else 0, axis=1)
-        if len(df[(df["check"]==0) & 
-                  (df["rooms"] != "-")]) > 0:
-            raise ValueError("There might be mismatch between type of flat scraped and translated")
+            # ? this handles the case when empty JSON would be created and not read by GeoData
+            if len(df_missing) > 0:
+                # scrape details of missing esates
+                logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Going to scrape missing estate details for ALL')
+                new_estate_details = self.scraper.scrape_specific_estates(df_missing, full_datetime)
+                logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Finished scraping missing estate details for ALL')        
+            else:
+                logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: No need to scrape missing estate details for ALL')        
+
+        #? final step: Geodata for all JSON files that do not have any, a.k.a new estate_detail scraped.
+        logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Updating GeoData')
+        self.geodata.enrich_jsons_with_geodata(list_of_jsons=None)
+        logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Updating GeoData Done')
         
-        #TODO: zapiš i batch a zapiš i cenu. Toto jsou "jen" nové estate_details
+
+    #TODO: tento bude brát JSONy, mergovat/zipovat na ně GEOJsony, přidá empty sloupce, nacpe do DB
+    def input_all_estates_to_db(self):
         
-        self._insert_new_estate(df, timestamp)
-        print(f"DONE: processing new estates")
+        #? First prepare all existing JSONs to df, and compare to existing DB
+        logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Starting processing JSONs to DB.')
+        df_new = self.utils.prepare_estate_detail_jsons_to_df()
         
-        ######## Updating existing offer ########
-        df_upd = df_new[df_new["code"].isin(all_estate_codes)].copy()
-        print(f"There are {len(df_upd)} estates to UPDATE")
+        df = self.data_manager.get_all_rows("estate_detail")
+        logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: There are already {len(df)} estate rows in DB')
         
-        if len(df_upd) > 0:
-            self._update_estate(df_upd, df_all)
-            print(f"DONE: Updating existing estates")
-        else:
-            print(f"we do not update anything")
-            
-        """
-        ##
+        existing_codes = df["code"].unique() if len(df) > 0 else []
+        df_new = df_new[~df_new["code"].isin(existing_codes)]
+        logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: There are {len(df_new)} new rows coming from JSONs file')
+                
+        #? Take offers which codes are not yet in DB and load them into DB
+        timestamp, _ = self.utils.generate_timestamp()
+        self.data_manager.insert_new_estates(df_new, timestamp)
+        logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Inserting estates DONE.')
+
+        ############################################################################################
+    def input_all_prices_to_db(self):
         
+        #? Prepare all CSV with prices to df, and compare to existing DB
+        logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Starting processing CSVs to DB.')
+        df_new = self.utils.prepare_price_history_csv_to_df()
+        print(len(df_new))
+        display(df_new.head())
         
+        df = self.data_manager.get_all_rows("price_history")
+        logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: There are already {len(df)} price rows in DB')
         
+        #
+        #
+        #
         
+        #? Take offers which are not yet in DB and load them into DB ??
+        #todo jde to vlbec odlišit? nemusím all or nothing?
+        logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Inserting new price rows into DB.')
+        timestamp, _ = self.utils.generate_timestamp()
+        #self.data_manager  ####
+        logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Inserting prices DONE.')
+
+        return df_new
         
+        # create special LOG file
+    

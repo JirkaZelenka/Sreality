@@ -74,7 +74,7 @@ class DataManager:
         except sqlite3.Error as e:
             print("Error Creating table:", e)
                  
-    def _insert_new_estate(self, df, timestamp):
+    def insert_new_estates(self, df, timestamp):
         
         conn = self._get_connection()
         try:
@@ -133,6 +133,7 @@ class DataManager:
                     str(r['floor_area']),
                     str(r['energy_efficiency_rating']),
                     str(r['no_barriers']),
+                    str(r['start_of_offer']),
                     timestamp
                     ])
 
@@ -150,13 +151,13 @@ class DataManager:
                     room_count_cb, energy_efficiency_rating_cb, note_about_price,
                     id_of_order, last_update, material, age_of_building,
                     ownership_type, floor, usable_area, floor_area,
-                    energy_efficiency_rating, no_barriers, created_at)
+                    energy_efficiency_rating, no_barriers, start_of_offer, created_at)
                     
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
                             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
                             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
                             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """             
             cursor.executemany(query, data_to_upload)
             conn.commit()
@@ -226,7 +227,7 @@ class DataManager:
                                        ])
                 
             query = f"""
-                    INSERT INTO scraped_prices (
+                    INSERT INTO price_history (
                     estate_id, price, created_at)
                     VALUES (?, ?, ?)
                     """

@@ -9,6 +9,9 @@ class Config:
         self.project_path = os.getenv("project_path") 
         self.data_folder = os.getenv("data_folder")  
         self.db_name = os.getenv("db_name") 
+        self.estate_details_folder = os.getenv("estate_details_folder")
+        self.geo_locations_folder = os.getenv("geo_locations_folder")
+        self.scraped_prices_folder = os.getenv("scraped_prices_folder")
         
         # category_type_cb
         self.type_of_deal={"1": "prodej",
@@ -105,14 +108,14 @@ class Config:
                     created_at datetime NOT NULL
                     ); 
                     """,
-            "scraped_prices": 
+            "price_history": 
                     """ 
-                    CREATE TABLE IF NOT EXISTS scraped_prices (
+                    CREATE TABLE IF NOT EXISTS price_history (
                     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                     estate_id INTEGER NOT NULL,
                     price INTEGER NOT NULL,
                     crawled_at datetime NOT NULL,
-                    FOREIGN KEY (estate_id) REFERENCES estate_detail (id),
+                    FOREIGN KEY (estate_id) REFERENCES estate_detail (id)
                     ); 
                     """                
         }
