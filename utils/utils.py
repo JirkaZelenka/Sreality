@@ -124,8 +124,7 @@ class Utilities:
     def prepare_price_history_csv_to_df(self) -> pd.DataFrame:   
         """
         Takes all CSV file with price_history.
-        Returns merged dataframe.
-        Compares with existing rows in database.
+        Prepare list of dataframes, and in the end concats them.
         """
         
         folder_with_csv_files= f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.scraped_prices_folder}"
@@ -139,13 +138,13 @@ class Utilities:
                 with open(file_path, 'r') as file:
                     data = pd.read_csv(file, sep=";", encoding="utf-8")
                     
-                #df = pd.concat([df, data], ignore_index=True)
                 dfs.append(data)
             except:
                 print(f"There was an error in file {file_name}")
                 continue
         
         df = pd.concat(dfs, ignore_index=True)
+        df.rename(columns={"code": "estate_id",'timestamp': 'crawled_at'}, inplace=True)
 
         return df 
     
@@ -211,29 +210,27 @@ class GeoData:
         tqdm.pandas(desc="Processing Locations", total=len(df))
         df["locality_to_parse"] = df.progress_apply(lambda row: self.get_location(row["locality_gps_lat"], row["locality_gps_lon"]), axis=1)
         
-        tqdm.pandas(desc="Processing parsing", total=len(df))
-        df[['locality', 'city', 'district', 'region']] = df['locality_to_parse'].progress_apply(lambda x: pd.Series(self.parse_location(x)))
+        df[['locality', 'city', 'district', 'region']] = df['locality_to_parse'].apply(lambda x: pd.Series(self.parse_location(x)))
 
         return df
     
     def enrich_jsons_with_geodata(self, list_of_jsons: None) -> pd.DataFrame:   
         """
         Works with list of JSONs names, if not provided, process all files in the folder.
-        Files that are already translated are skipped.
+        Files that are already translated in target folder are skipped.
+        For each file, creates new json with geolocation data.
         """
         
         source_folder= f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.estate_details_folder}"
         files = os.listdir(source_folder) if not list_of_jsons else list_of_jsons
         target_folder = f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.geo_locations_folder}"
         
-        #? for each file in the folder, if it does not exist yet as a 'geodata_file' in the target folder
         for file_name in tqdm(files):        
             source_path = os.path.join(source_folder, file_name)
             save_file_name = f"geodata_{file_name}"
             target_path = os.path.join(target_folder, save_file_name)
             
             if os.path.exists(target_path):
-                #print(f"Name {save_file_name} in {target_folder} already exists.")
                 continue
 
             with open(source_path, 'r') as file:

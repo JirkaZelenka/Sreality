@@ -107,7 +107,6 @@ class Runner:
         self.geodata.enrich_jsons_with_geodata(list_of_jsons=None)
         logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Updating GeoData Done')
         
-
     #TODO: tento bude brát JSONy, mergovat/zipovat na ně GEOJsony, přidá empty sloupce, nacpe do DB
     def input_all_estates_to_db(self):
         
@@ -123,34 +122,42 @@ class Runner:
         logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: There are {len(df_new)} new rows coming from JSONs file')
                 
         #? Take offers which codes are not yet in DB and load them into DB
-        timestamp, _ = self.utils.generate_timestamp()
-        self.data_manager.insert_new_estates(df_new, timestamp)
-        logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Inserting estates DONE.')
+        if len(df_new) > 0:
+            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Inserting estate_details into DB.')
+            self.data_manager.insert_new_estates(df_new)
+            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Inserting estates DONE.')
+        else:
+            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: No need to insert new estate_details into DB. DONE.')
 
-        ############################################################################################
     def input_all_prices_to_db(self):
         
         #? Prepare all CSV with prices to df, and compare to existing DB
         logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Starting processing CSVs to DB.')
         df_new = self.utils.prepare_price_history_csv_to_df()
-        print(len(df_new))
-        display(df_new.head())
+        df_new = df_new.drop_duplicates()
         
         df = self.data_manager.get_all_rows("price_history")
         logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: There are already {len(df)} price rows in DB')
         
-        #
-        #
-        #
-        
-        #? Take offers which are not yet in DB and load them into DB ??
-        #todo jde to vlbec odlišit? nemusím all or nothing?
-        logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Inserting new price rows into DB.')
-        timestamp, _ = self.utils.generate_timestamp()
-        #self.data_manager  ####
-        logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Inserting prices DONE.')
+        #? cool way how to find rows which are not part of another df
+        df_new = df_new[~df_new.isin(df.to_dict(orient='list')).all(axis=1)]
+        logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: There are {len(df_new)} new rows coming from CSV file')
 
-        return df_new
-        
-        # create special LOG file
+        #? Take prices which are not yet in DB and load them into DB ??
+        if len(df_new) > 0:
+            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Inserting new price rows into DB.')
+            self.data_manager.insert_new_price(df_new)
+            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Inserting prices DONE.')
+        else:
+            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: No need to insert new prices into DB. DONE.')
     
+    #? Combination of scraping, GeoPandas, and Updating DB
+    def run_complete_scraping(self,
+                            scrape_prodej_byty: Optional[bool] = True,
+                            scrape_all: Optional[bool] = True)->pd.DataFrame:
+
+        self.scrape_and_update_run(scrape_prodej_byty=scrape_prodej_byty,
+                                    scrape_all=scrape_all)
+        
+        self.input_all_estates_to_db()
+        self.input_all_prices_to_db()

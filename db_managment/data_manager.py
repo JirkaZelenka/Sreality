@@ -74,7 +74,7 @@ class DataManager:
         except sqlite3.Error as e:
             print("Error Creating table:", e)
                  
-    def insert_new_estates(self, df, timestamp):
+    def insert_new_estates(self, df):
         
         conn = self._get_connection()
         try:
@@ -134,7 +134,7 @@ class DataManager:
                     str(r['energy_efficiency_rating']),
                     str(r['no_barriers']),
                     str(r['start_of_offer']),
-                    timestamp
+                    str(r['timestamp']),
                     ])
 
             query = f"""
@@ -151,7 +151,7 @@ class DataManager:
                     room_count_cb, energy_efficiency_rating_cb, note_about_price,
                     id_of_order, last_update, material, age_of_building,
                     ownership_type, floor, usable_area, floor_area,
-                    energy_efficiency_rating, no_barriers, start_of_offer, created_at)
+                    energy_efficiency_rating, no_barriers, start_of_offer, crawled_at)
                     
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
                             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
@@ -168,8 +168,10 @@ class DataManager:
             
         conn.close()
         
-    #TODO: removing this as obsolete, no updates of estate_detail in terms of price
-    def _update_estate(self, df, df_all):
+    def _update_estate(self, df):
+        """
+        Updates all estates from the DF. Currently only Timestamp, but could be any detail.
+        """
         
         conn = self._get_connection()
         try:
@@ -179,26 +181,13 @@ class DataManager:
             for i in tqdm(range(len(df))):
                 r = df.iloc[i]
 
-                previous_offer = df_all[df_all["code"] == r['code']]
-                #print(f"dosavadní maximum: {previous_offer['max_price'].iloc[0]}, nová cena ke zvážení: {r['price']}")
-                max_price = max(previous_offer['max_price'].iloc[0], r['price'])
-                min_price = min(previous_offer['min_price'].iloc[0], r['price'])
-                #print(f"new max a min price: {max_price}, {min_price}")
-                
                 data_to_upload.append([
-                    r["timestamp"],  # last_update should be changed every time the estate occurs in a new batch. chronologically
-                    str(max_price),
-                    str(min_price),
-                    str(r['price']),
-                    str(r['code']), 
+                    r["timestamp"]
                     ])
 
             query = f"""
                     UPDATE estate_detail SET 
-                        last_update = ?, 
-                        max_price = ?,
-                        min_price = ?,
-                        last_price = ?
+                        last_update = ?
                     WHERE code = ?
                     """          
             cursor.executemany(query, data_to_upload)
@@ -210,25 +199,25 @@ class DataManager:
             
         conn.close()
     
-    def insert_new_price(self, df, timestamp):
+    def insert_new_price(self, df):
         
         conn = self._get_connection()
         try:
-            #? only here foreing keys are applied and need to be actively enforced
-            conn.execute("PRAGMA foreign_keys = ON")
+            #? only here foreing keys constraint can be applied and need to be actively enforced
+            #conn.execute("PRAGMA foreign_keys = ON")
             cursor = conn.cursor()
             
             data_to_upload = []
             for i in range(len(df)):
                 r = df.iloc[i]
-                data_to_upload.append([r['estate_id'],
-                                       r["price"],
-                                       timestamp
+                data_to_upload.append([str(r['estate_id']),
+                                       str(r["price"]),
+                                       str(r["crawled_at"])
                                        ])
                 
             query = f"""
                     INSERT INTO price_history (
-                    estate_id, price, created_at)
+                    estate_id, price, crawled_at)
                     VALUES (?, ?, ?)
                     """
             cursor.executemany(query, data_to_upload)

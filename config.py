@@ -105,7 +105,7 @@ class Config:
                     energy_efficiency_rating VARCHAR(255) NOT NULL,
                     no_barriers VARCHAR(255) NOT NULL,
                     start_of_offer VARCHAR(255) NOT NULL,
-                    created_at datetime NOT NULL
+                    crawled_at datetime NOT NULL
                     ); 
                     """,
             "price_history": 
