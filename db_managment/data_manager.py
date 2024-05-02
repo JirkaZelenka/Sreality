@@ -24,7 +24,8 @@ class DataManager:
             conn = sqlite3.connect(f"{self.cf.project_path}/{self.cf.db_name}")
             return conn
         except sqlite3.Error as e:
-            print("Error connecting to database:", e)
+            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error connecting to database: {e}') 
+
             return None
 
     def get_all_rows(self, table_name):
@@ -38,6 +39,10 @@ class DataManager:
         
         except sqlite3.Error as e:
             print("Error performing operations:", e)
+            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error loading rows from table {table_name}: {e}') 
+            conn.rollback()
+        
+        conn.close()
         
     def clear_table(self, table_name):
         
@@ -48,7 +53,10 @@ class DataManager:
             conn.commit()
             cursor.close()
         except sqlite3.Error as e:
-            print("Error deleting rows:", e)
+            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error clearing table {table_name}: {e}') 
+            conn.rollback()
+        
+        conn.close()
             
     def drop_table(self, table_name):
         
@@ -59,8 +67,11 @@ class DataManager:
             conn.commit()
             cursor.close()
         except sqlite3.Error as e:
-            print("Error dropping table:", e)
-                   
+            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error dropping table {table_name}: {e}') 
+            conn.rollback()
+        
+        conn.close()
+               
     def create_table(self, table_name):
         
         conn = self._get_connection()
@@ -72,7 +83,10 @@ class DataManager:
             conn.commit()
             cursor.close()
         except sqlite3.Error as e:
-            print("Error Creating table:", e)
+            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error creating table {table_name}: {e}') 
+            conn.rollback()
+        
+        conn.close()
                  
     def insert_new_estates(self, df):
         
@@ -163,11 +177,12 @@ class DataManager:
             conn.commit()
 
         except sqlite3.Error as e:
-            print("Error inserting offer:", e)
+            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error inserting offer: {e}')        
             conn.rollback()
             
         conn.close()
         
+    # TODO: future use?
     def _update_estate(self, df):
         """
         Updates all estates from the DF. Currently only Timestamp, but could be any detail.
@@ -194,7 +209,7 @@ class DataManager:
             conn.commit()
 
         except sqlite3.Error as e:
-            print("Error updating offer:", e)
+            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error updating offer: {e}')        
             conn.rollback()
             
         conn.close()
@@ -224,7 +239,7 @@ class DataManager:
             conn.commit()
 
         except sqlite3.Error as e:
-            print("Error inserting offer:", e)
+            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error inserting offer: {e}')        
             conn.rollback()
             
         conn.close()
