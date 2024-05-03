@@ -32,3 +32,4 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 * 29.4. Preparing and inserting estate_details into DB
 * 30.4. Preparing and inserting Price history into DB
 * 1.5. Complete run with scraping missing details and updating DB
+* 3.5. Logging significantly improved

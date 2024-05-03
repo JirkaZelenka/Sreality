@@ -11,9 +11,7 @@ from geopy.exc import GeocoderTimedOut  # for Error handling
 
 from config import Config
 
-import logging
-logger = logging.getLogger(__name__)
-logging.basicConfig(filename='scraping.log', encoding='utf-8', level=logging.INFO)
+from utils.logger import logger
 
 class Utilities:
     
@@ -25,7 +23,9 @@ class Utilities:
         current_datetime = datetime.now()
         full_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
         date_to_save = current_datetime.strftime("%Y%m%d_%H%M")
-                
+        
+        logger.info('Starting process.')
+        
         return full_datetime, date_to_save
     
     def safe_save_csv(self, df: pd.DataFrame, filename: str):
@@ -50,7 +50,6 @@ class Utilities:
     def translate_type_of_rooms(self, code_category_sub_cb):
         return self.cf.type_of_rooms[str(code_category_sub_cb)]
     
-    #TODO: musí být robustní, předem očištěné JSONy o uvozovky, špatně escapované znaky, atd.
     def compare_codes_to_existing_jsons(self, codes_not_found: list[str]) -> list[str]:
         """
         Checks if given estate codes exists in any JSON file with details, and returns list of codes that are new.

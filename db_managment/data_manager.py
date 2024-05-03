@@ -8,11 +8,8 @@ import os
 
 from config import Config 
 
-import logging
-logger = logging.getLogger(__name__)
-logging.basicConfig(filename='scraping.log', encoding='utf-8', level=logging.INFO)
+from utils.logger import logger
 
- 
 class DataManager:
     """
     All operations available on the daatabase tables.

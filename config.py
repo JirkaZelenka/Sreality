@@ -13,9 +13,11 @@ class Config:
         self.scraped_prices_folder = os.getenv("scraped_prices_folder")
         self.db_name = os.getenv("db_name") 
         self.mailing_credentials = {"server": os.getenv("server"),
-                        "port": os.getenv("port"),
-                        "email": os.getenv("email"),
-                        "password": os.getenv("password")}
+                                    "port": os.getenv("port"),
+                                    "sender_email": os.getenv("email"),
+                                    "password": os.getenv("password"),
+                                    "receiver_email:": os.getenv("receiver_email")
+                                    }
         
         # category_type_cb
         self.type_of_deal={"1": "prodej",

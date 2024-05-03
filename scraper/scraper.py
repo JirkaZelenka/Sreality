@@ -1,18 +1,11 @@
-from datetime import datetime
 import pandas as pd
 from tqdm import tqdm  
 import requests   
-import re
 from typing import Optional
-import os
 
 from config import Config
-
 from utils.utils import Utilities
-
-import logging
-logger = logging.getLogger(__name__)
-logging.basicConfig(filename='scraping.log', encoding='utf-8', level=logging.INFO)
+from utils.logger import logger
 
 class SrealityScraper:
     
@@ -38,7 +31,7 @@ class SrealityScraper:
 
         with requests.Session() as session:
             result =  session.request(method="GET", url=url_count, headers=headers).json()
-        logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: There are {result["result_size"]} number of ALL estates (Byt, Dům, Pronájem, Prodej)')
+        logger.info(f'There are {result["result_size"]} number of ALL estates (Byt, Dům, Pronájem, Prodej)')
 
         #TODO: nyní radši beru celkový počet stran, abych vzal určitě všechno. 
         #TODO Příště rozpadnout podle inputů na správnou url/count a správné pages
@@ -47,7 +40,7 @@ class SrealityScraper:
 
         with requests.Session() as session:
             result =  session.request(method="GET", url=url_count_prodej_byty, headers=headers).json()
-        logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: There are {result["result_size"]} number of Prodej-Byty estates.')
+        logger.info(f'There are {result["result_size"]} number of Prodej-Byty estates.')
 
         urls = []
         for page in range(1, pages+1):
