@@ -7,6 +7,11 @@ import sqlite3
 import os
 
 from config import Config 
+
+import logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(filename='scraping.log', encoding='utf-8', level=logging.INFO)
+
  
 class DataManager:
     """
@@ -38,7 +43,6 @@ class DataManager:
             return df
         
         except sqlite3.Error as e:
-            print("Error performing operations:", e)
             logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error loading rows from table {table_name}: {e}') 
             conn.rollback()
         

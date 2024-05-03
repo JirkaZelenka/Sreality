@@ -11,6 +11,10 @@ from geopy.exc import GeocoderTimedOut  # for Error handling
 
 from config import Config
 
+import logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(filename='scraping.log', encoding='utf-8', level=logging.INFO)
+
 class Utilities:
     
     def __init__(self) -> None: 
@@ -21,6 +25,7 @@ class Utilities:
         current_datetime = datetime.now()
         full_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
         date_to_save = current_datetime.strftime("%Y%m%d_%H%M")
+                
         return full_datetime, date_to_save
     
     def safe_save_csv(self, df: pd.DataFrame, filename: str):
@@ -28,13 +33,12 @@ class Utilities:
         file_path = f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.scraped_prices_folder}/{filename}.csv" 
         
         if os.path.exists(file_path):
-            print(f"Name {filename} in {file_path} already exists.")
+            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Name {filename} in {file_path} already exists. Saving as {filename}_SAFE')
             filename += "_SAFE"
             file_path = f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.scraped_prices_folder}/{filename}.csv" 
             df.to_csv(file_path, sep=";", encoding="utf-8", index=False)
         
         else:
-            print(f"Saving {filename} to {file_path}")
             df.to_csv(file_path, sep=";", encoding="utf-8", index=False)
             
     def translate_type_of_building(self, code_category_main_cb):
@@ -51,12 +55,9 @@ class Utilities:
         """
         Checks if given estate codes exists in any JSON file with details, and returns list of codes that are new.
         """
-        
         folder_with_jsons_files= f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.estate_details_folder}"
         files = os.listdir(folder_with_jsons_files)
-        
-        print(f"init len of codes not found {len(codes_not_found)}")
-        
+                
         for file_name in files:
             file_path = os.path.join(folder_with_jsons_files, file_name)
 
@@ -66,10 +67,7 @@ class Utilities:
             codes_from_json = [str(item['code']) for item in data]
     
             codes_not_found = [x for x in codes_not_found if x not in codes_from_json]
-            #print(f"len of codes not found after checking file {file_name}: {len(codes_not_found)}")
-            
-        print(f"Codes Not found: {len(codes_not_found)}")         
-        
+                    
         return codes_not_found
     
     def save_progress_json(self, files_with_code, date_to_save):
@@ -89,6 +87,7 @@ class Utilities:
         files = os.listdir(folder_with_jsons_files)
         
         dfs = []
+        print("PREPARING Estate details JSONs to DF")
         for file_name in tqdm(files):
             file_path = os.path.join(folder_with_jsons_files, file_name)
 
@@ -131,6 +130,7 @@ class Utilities:
         files = os.listdir(folder_with_csv_files)
         
         dfs = []
+        print("PREPARING Price history CSVs to DF")
         for file_name in tqdm(files):
             file_path = os.path.join(folder_with_csv_files, file_name)
 
@@ -140,7 +140,7 @@ class Utilities:
                     
                 dfs.append(data)
             except:
-                print(f"There was an error in file {file_name}")
+                logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: There was an error in file {file_name}')
                 continue
         
         df = pd.concat(dfs, ignore_index=True)
@@ -225,6 +225,7 @@ class GeoData:
         files = os.listdir(source_folder) if not list_of_jsons else list_of_jsons
         target_folder = f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.geo_locations_folder}"
         
+        print("ENRICHING geolocation data.")
         for file_name in tqdm(files):        
             source_path = os.path.join(source_folder, file_name)
             save_file_name = f"geodata_{file_name}"
