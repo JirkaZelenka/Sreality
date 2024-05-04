@@ -1,10 +1,6 @@
-from datetime import datetime
 import pandas as pd
-from tqdm import tqdm  
-import requests 
 from typing import Optional
 import os
-import json
 
 os.chdir("c:\\Users\\jirka\\Documents\\MyProjects\\Sreality")
 from scraper.scraper import SrealityScraper
@@ -129,23 +125,23 @@ class Runner:
         """
         
         #? Prepare all CSV with prices to df, and compare to existing DB
-        logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Starting processing CSVs to price_history table.')
+        logger.info(f'Starting processing CSVs to price_history table.')
         df_new = self.utils.prepare_price_history_csv_to_df()
         df_new = df_new.drop_duplicates()
         
         df = self.data_manager.get_all_rows("price_history")
-        logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Already {len(df)} rows in price_history.')
+        logger.info(f'Already {len(df)} rows in price_history.')
         
         #? cool way how to find rows which are not part of another df
         df_new = df_new[~df_new.isin(df.to_dict(orient='list')).all(axis=1)]
-        logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Prepared {len(df_new)} new rows.')
+        logger.info(f'Prepared {len(df_new)} new rows.')
 
         #? Take prices which are not yet in DB and load them into DB ??
         if len(df_new) > 0:
             self.data_manager.insert_new_price(df_new)
-            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Inserting into price_history DONE.')
+            logger.info(f'Inserting into price_history DONE.')
         else:
-            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: No need to insert into price_history. DONE.')
+            logger.info(f'No need to insert into price_history. DONE.')
     
     #? Combination of scraping, GeoPandas, and Updating DB
     def run_complete_scraping(self,

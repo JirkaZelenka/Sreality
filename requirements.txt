@@ -90,6 +90,8 @@ pyzmq==26.0.2
     #   jupyter-client
 requests==2.31.0
     # via -r requirements.in
+scheduler==0.8.5
+    # via -r requirements.in
 six==1.16.0
     # via
     #   asttokens
@@ -110,10 +112,14 @@ traitlets==5.14.3
     #   jupyter-client
     #   jupyter-core
     #   matplotlib-inline
+typeguard==4.2.1
+    # via scheduler
 typing==3.7.4.3
     # via -r requirements.in
 typing-extensions==4.11.0
-    # via ipython
+    # via
+    #   ipython
+    #   typeguard
 tzdata==2024.1
     # via pandas
 urllib3==2.2.1

@@ -14,9 +14,9 @@ class Config:
         self.db_name = os.getenv("db_name") 
         self.mailing_credentials = {"server": os.getenv("server"),
                                     "port": os.getenv("port"),
-                                    "sender_email": os.getenv("email"),
+                                    "sender_email": os.getenv("sender_email"),
                                     "password": os.getenv("password"),
-                                    "receiver_email:": os.getenv("receiver_email")
+                                    "receiver_email": os.getenv("receiver_email")
                                     }
         
         # category_type_cb

@@ -7,3 +7,4 @@ tqdm
 requests
 db-sqlite3
 geopy
+scheduler

@@ -23,9 +23,7 @@ class Utilities:
         current_datetime = datetime.now()
         full_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
         date_to_save = current_datetime.strftime("%Y%m%d_%H%M")
-        
-        logger.info('Starting process.')
-        
+                
         return full_datetime, date_to_save
     
     def safe_save_csv(self, df: pd.DataFrame, filename: str):
