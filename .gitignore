@@ -14,5 +14,6 @@ notes.md
 # data collection - with exception of testing data?
 /data_*/
 .db
+all_data.db
 # Logs
-.log
+scraping.log
