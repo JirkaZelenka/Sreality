@@ -33,3 +33,4 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 * 30.4. Preparing and inserting Price history into DB
 * 1.5. Complete run with scraping missing details and updating DB
 * 3.5. Logging significantly improved
+* 4.5. basic mailing and scheduler of the scraper

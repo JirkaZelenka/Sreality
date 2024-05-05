@@ -13,6 +13,7 @@ from utils.logger import logger
 
 class Runner:
     
+    #TODO: each object in config has its own config.py, so does runner itself.too many?
     def __init__(self) -> None: 
         self.cf = Config()   
         self.scraper = SrealityScraper()
@@ -161,3 +162,6 @@ class Runner:
         self.input_all_prices_to_db()
         
         logger.info(f'FINISHING complete process of data gathering.')
+
+    def diagnostics_after_run(self):
+        self.diagnotstics.diagnostics.count_new_estates

@@ -45,6 +45,21 @@ class DataManager:
         
         conn.close()
         
+    def get_all_rows_from_date(self, table_name, timestamp):
+        
+        conn = self._get_connection()        
+        try:
+            query = f"SELECT * FROM {table_name} WHERE crawled_at = '{timestamp}'"
+            df = pd.read_sql_query(query, conn)
+            conn.close()
+            return df
+        
+        except sqlite3.Error as e:
+            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error loading rows from table {table_name} for timestamp {timestamp}: {e}') 
+            conn.rollback()
+        
+        conn.close()
+        
     def clear_table(self, table_name):
         
         conn = self._get_connection()
