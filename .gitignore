@@ -1,7 +1,7 @@
 # Byte-compiled / optimized / DLL files
 utils/__pycache__/
 .pyc
-# Web drivers - necessary for Selenium
+# Web drivers - necessary for Selenium version of scraping
 .exe
 # Env variables such as path
 .env
@@ -13,3 +13,7 @@ notes.md
 .pbix
 # data collection - with exception of testing data?
 /data_*/
+.db
+all_data.db
+# Logs
+scraping.log

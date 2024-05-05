@@ -1,14 +1,11 @@
-from datetime import datetime
 import pandas as pd
 from tqdm import tqdm  
 import requests   
-import re
 from typing import Optional
-import os
 
 from config import Config
-
 from utils.utils import Utilities
+from utils.logger import logger
 
 class SrealityScraper:
     
@@ -21,9 +18,8 @@ class SrealityScraper:
                     category_main_cb: Optional[int] = None, # 1 = Byt
                     category_type_cb: Optional[int] = None, # 1 = Prodej
                     category_sub_cb: Optional[int] = None, # 2 = 1+kk
-                    per_page: Optional[int] = 999, # 999 is max to display on one page
+                    per_page: Optional[int] = 999, # 999 is max to show on single page
                     ) -> pd.DataFrame:  
-   
 
         url_base = "https://www.sreality.cz/api/cs/v2/estates?"
         url_count = f"https://www.sreality.cz/api/cs/v2/estates/count" 
@@ -35,16 +31,16 @@ class SrealityScraper:
 
         with requests.Session() as session:
             result =  session.request(method="GET", url=url_count, headers=headers).json()
-        print(f"number of ALL estates (Byt, Dům, Pronájem, Prodej): {result['result_size']}")
-        
+        logger.info(f'There are {result["result_size"]} number of ALL estates (Byt, Dům, Pronájem, Prodej)')
+
         #TODO: nyní radši beru celkový počet stran, abych vzal určitě všechno. 
         #TODO Příště rozpadnout podle inputů na správnou url/count a správné pages
         pages = (result["result_size"]//per_page) + 1
-        print(f"we will scrape max {pages} pages with {per_page} results each")
+        print(f"There are max {pages} pages with {per_page} results each")
 
         with requests.Session() as session:
             result =  session.request(method="GET", url=url_count_prodej_byty, headers=headers).json()
-        print(f"number of Prodej - Byty: {result['result_size']}")
+        logger.info(f'There are {result["result_size"]} number of Prodej-Byty estates.')
 
         urls = []
         for page in range(1, pages+1):
@@ -57,11 +53,11 @@ class SrealityScraper:
                 url += f"category_sub_cb={category_sub_cb}&"
             
             urls.append(f"{url}per_page={per_page}&page={page}")
-        print(urls)
 
         #TODO: není lepší si dočasně "uložit" těchto 29 stránek celých, a až pak je naloadovat, rozsekat, uložit (E-T-L) a pak zas dropnout? 
         #TODO ...než dělat to: for i in result["_embedded"]["estates"]
         data = []
+        print("SCRAPING Prices")
         for url in tqdm(urls):
             
             with requests.Session() as session:
@@ -91,6 +87,7 @@ class SrealityScraper:
     
         data = []
         save_counter = 0
+        print("SCRAPING Estate detils.")
         for code in tqdm(codes):
             
             if save_counter == 500:

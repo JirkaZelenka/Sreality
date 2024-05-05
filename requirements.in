@@ -1,0 +1,10 @@
+ipykernel
+python-dotenv
+datetime
+typing
+pandas
+tqdm
+requests
+db-sqlite3
+geopy
+scheduler
