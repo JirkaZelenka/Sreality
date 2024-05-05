@@ -171,6 +171,7 @@ class SrealityScraper:
             except:
                 d = {}
                 d["code"] = code
+                d["timestamp"] = timestamp
                 save_counter += 1
                 data.append(d)
             
