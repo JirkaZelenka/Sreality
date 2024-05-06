@@ -21,40 +21,40 @@ class Config:
         
         # category_type_cb
         self.type_of_deal={"1": "prodej",
-                        "2": "pronájem",
-                        "3": "dražba",
-                        "4": "prodej podílu",
-                        }
+                           "2": "pronájem",
+                           "3": "dražba",
+                           "4": "prodej podílu",
+                           }
         
         # category_main_cb
         self.type_of_building={"1": "byt",
-                            "2": "dům",
-                            "3": "pozemek",
-                            "4": "komerční nemovitost a nebytový prostor",
-                            "5": "ostatní",
-                            }
+                               "2": "dům",
+                               "3": "pozemek",
+                               "4": "komerční nemovitost a nebytový prostor",
+                               "5": "ostatní",
+                               }
 
         # category_sub_cb
         self.type_of_rooms={"1" : "N/A",
-                        "2": "1+kk",
-                        "3": "1+1",
-                        "4": "2+kk",
-                        "5": "2+1",
-                        "6": "3+kk",
-                        "7": "3+1",
-                        "8": "4+kk",
-                        "9": "4+1",
-                        "10": "5+kk",
-                        "11": "5+1",
-                        "12": "6 pokoju a vic",
-                        "16": "atypické",
-                        "19": "stavební parcela",
-                        "23": "zahrada" ,
-                        "33": "chata" ,
-                        "37": "rodinný" ,
-                        "39": "vila",
-                        "47": "pronájem pokoje"
-                        }
+                            "2": "1+kk",
+                            "3": "1+1",
+                            "4": "2+kk",
+                            "5": "2+1",
+                            "6": "3+kk",
+                            "7": "3+1",
+                            "8": "4+kk",
+                            "9": "4+1",
+                            "10": "5+kk",
+                            "11": "5+1",
+                            "12": "6 pokoju a vic",
+                            "16": "atypické",
+                            "19": "stavební parcela",
+                            "23": "zahrada",
+                            "33": "chata",
+                            "37": "rodinný",
+                            "39": "vila",
+                            "47": "pronájem pokoje"
+                            }
                 
         self.table_definitions={
             "estate_detail": 
@@ -67,6 +67,8 @@ class Config:
                     category_main_cb INTEGER NOT NULL,
                     category_type_cb INTEGER NOT NULL,
                     category_sub_cb INTEGER NOT NULL,
+                    locality_url VARCHAR(255) NOT NULL,
+                    estate_url VARCHAR(255) NOT NULL,
                     broker_id INTEGER NOT NULL,
                     broker_company VARCHAR(255) NOT NULL,
                     furnished INTEGER NOT NULL,

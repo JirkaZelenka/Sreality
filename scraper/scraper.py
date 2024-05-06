@@ -108,6 +108,7 @@ class SrealityScraper:
                 d["category_main_cb"] = int(r["seo"]["category_main_cb"])
                 d["category_sub_cb"] = int(r["seo"]["category_sub_cb"])
                 d["category_type_cb"] = int(r["seo"]["category_type_cb"])
+                d["locality_url"] = int(r["seo"]["locality"])
                 #############
                 d["broker_id"] = str(r["_embedded"]["seller"]["user_id"])
                 d["broker_company"] = str(r["_embedded"]["seller"]["_embedded"]["premise"]["name"])

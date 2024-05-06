@@ -120,6 +120,8 @@ class DataManager:
                     str(r['category_main_cb']),
                     str(r['category_type_cb']),
                     str(r['category_sub_cb']),
+                    str(r['locality_url']),
+                    str(r['estate_url']),
                     str(r['broker_id']),
                     str(r['broker_company']),
                     str(r['furnished']),
@@ -170,7 +172,7 @@ class DataManager:
             query = f"""
                     INSERT INTO estate_detail (
                     code, description, meta_description,
-                    category_main_cb, category_type_cb, category_sub_cb,
+                    category_main_cb, category_type_cb, category_sub_cb, locality_url, estate_url,
                     broker_id, broker_company, furnished,
                     latitude, longitude, locality, city, district, region,
                     object_type, parking_lots, locality_street_id, locality_district_id,
@@ -187,7 +189,8 @@ class DataManager:
                             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
                             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
                             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
+                            ?, ?, ?)
                     """             
             cursor.executemany(query, data_to_upload)
             conn.commit()
