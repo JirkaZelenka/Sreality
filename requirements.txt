@@ -30,6 +30,8 @@ decorator==5.1.1
     # via ipython
 executing==2.0.1
     # via stack-data
+fsspec==2024.3.1
+    # via -r requirements.in
 geographiclib==2.0
     # via geopy
 geopy==2.4.1

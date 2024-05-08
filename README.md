@@ -34,3 +34,6 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 * 1.5. Complete run with scraping missing details and updating DB
 * 3.5. Logging significantly improved
 * 4.5. basic mailing and scheduler of the scraper
+* 5.5. Diagnostics: new batch summary, price changes as mail
+* 6.5. scraping info to provide URL of the estate
+* 7.5. rework of estate_id, diagnostics provide URL and percentage change of price
