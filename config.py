@@ -50,10 +50,33 @@ class Config:
                             "16": "atypické",
                             "19": "stavební parcela",
                             "23": "zahrada",
+                            "25": "kancelář", #
+                            "26": "sklad", #
+                            "27": "výrobní hala", #
+                            "28": "obchodní prostory",  #
+                            "29": "ubytovací zařízení", #
+                            "30": "restaurace", #
+                            "31": "zemědělský objekt", #
+                            "32": "komerční nemovitost", #
                             "33": "chata",
+                            "34": "garáž", #
+                            "35": "památka", #
+                            "36": "specifický typ nemovitosti", #
                             "37": "rodinný",
+                            "38": "činžovní dům", #
                             "39": "vila",
-                            "47": "pronájem pokoje"
+                            "40": "projekt na klíč", #
+                            "43": "chalupa",
+                            "44": "zemědělská usedlost", #
+                            "47": "pronájem pokoje",
+                            "49": "virtuální kancelář", #
+                            "50": "vinný sklep", #
+                            "51": "půdní prostor", #
+                            "52": "garážové stání", #
+                            "53": "mobilheim", #
+                            "54": "vícegenerační dům", #
+                            "56": "ordinace", #
+                            "57": "apartmány" #
                             }
                 
         self.table_definitions={
@@ -61,7 +84,7 @@ class Config:
                     """ 
                     CREATE TABLE IF NOT EXISTS estate_detail (
                     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                    code VARCHAR(255) NOT NULL,
+                    estate_id VARCHAR(255) NOT NULL,
                     description VARCHAR(255) NOT NULL,
                     meta_description VARCHAR(255) NOT NULL,
                     category_main_cb INTEGER NOT NULL,
@@ -120,7 +143,7 @@ class Config:
                     """ 
                     CREATE TABLE IF NOT EXISTS price_history (
                     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                    estate_id INTEGER NOT NULL,
+                    estate_id VARCHAR(255) NOT NULL,
                     price INTEGER NOT NULL,
                     crawled_at datetime NOT NULL,
                     FOREIGN KEY (estate_id) REFERENCES estate_detail (id)
