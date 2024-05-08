@@ -10,7 +10,6 @@ from utils.logger import logger
 class SrealityScraper:
     
     def __init__(self) -> None: 
-        self.cf = Config()   
         self.utils = Utilities()
     
     def scrape_all_with_filter(self,
@@ -66,7 +65,7 @@ class SrealityScraper:
             try:
                 for i in result["_embedded"]["estates"]:                    
                     d = {}
-                    d["code"] = str(i["hash_id"])                    
+                    d["estate_id"] = str(i["hash_id"])                    
                     d["price"] = int(i["price"])
                     d["timestamp"] = timestamp
                     data.append(d)
@@ -76,7 +75,7 @@ class SrealityScraper:
         return data       
          
     def scrape_specific_estates(self,
-                    codes: list[str],
+                    estate_ids: list[str],
                     timestamp: str,
                     ):  
    
@@ -87,28 +86,29 @@ class SrealityScraper:
     
         data = []
         save_counter = 0
-        print("SCRAPING Estate detils.")
-        for code in tqdm(codes):
+        print("SCRAPING Estate details.")
+        for estate_id in tqdm(estate_ids):
             
             if save_counter == 500:
                 _, date_to_save = self.utils.generate_timestamp()
                 self.utils.save_progress_json(data, date_to_save)
                 save_counter = 0
             
-            url = f"{url_base}/{code}"
+            url = f"{url_base}/{estate_id}"
             
             with requests.Session() as session:
                 r = session.request(method="GET", url=url, headers=headers).json()
             try:
                 d = {}
-                d["code"] = str(r["recommendations_data"]["hash_id"])
+                #TODO: proč tady beru hash, a v except beru to zadané ID? xD
+                d["estate_id"] = str(r["recommendations_data"]["hash_id"])
                 d["description"] = str(r["text"]["value"])   
                 d["meta_description"] = str(r["meta_description"])     
                 #############               
                 d["category_main_cb"] = int(r["seo"]["category_main_cb"])
                 d["category_sub_cb"] = int(r["seo"]["category_sub_cb"])
                 d["category_type_cb"] = int(r["seo"]["category_type_cb"])
-                d["locality_url"] = int(r["seo"]["locality"])
+                d["locality_url"] = str(r["seo"]["locality"])
                 #############
                 d["broker_id"] = str(r["_embedded"]["seller"]["user_id"])
                 d["broker_company"] = str(r["_embedded"]["seller"]["_embedded"]["premise"]["name"])
@@ -171,7 +171,7 @@ class SrealityScraper:
                 data.append(d)
             except:
                 d = {}
-                d["code"] = code
+                d["estate_id"] = estate_id
                 d["timestamp"] = timestamp
                 save_counter += 1
                 data.append(d)

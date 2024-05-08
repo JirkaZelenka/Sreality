@@ -114,7 +114,7 @@ class DataManager:
             for i in range(len(df)):
                 r = df.iloc[i]
                 data_to_upload.append([
-                    str(r['code']),
+                    str(r['estate_id']),
                     str(r['description']),
                     str(r['meta_description']),
                     str(r['category_main_cb']),
@@ -171,7 +171,7 @@ class DataManager:
 
             query = f"""
                     INSERT INTO estate_detail (
-                    code, description, meta_description,
+                    estate_id, description, meta_description,
                     category_main_cb, category_type_cb, category_sub_cb, locality_url, estate_url,
                     broker_id, broker_company, furnished,
                     latitude, longitude, locality, city, district, region,

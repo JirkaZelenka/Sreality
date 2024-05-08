@@ -1,11 +1,13 @@
 import pandas as pd
 from typing import Optional
 import os
+import json
 
-os.chdir("c:\\Users\\jirka\\Documents\\MyProjects\\Sreality")
+from diagnostics.diagnostics import Diagnostics
 from scraper.scraper import SrealityScraper
 from db_managment.data_manager import DataManager
-from utils.utils import Utilities, GeoData
+from utils.utils import Utilities
+from utils.geodata import GeoData
 from utils.mailing import EmailService
 from config import Config
 
@@ -13,7 +15,7 @@ from utils.logger import logger
 
 class Runner:
     
-    #TODO: each object in config has its own config.py, so does runner itself.too many?
+    #TODO: each object in config has its own config.py, so does runner itself. too many?
     def __init__(self) -> None: 
         self.cf = Config()   
         self.scraper = SrealityScraper()
@@ -21,6 +23,7 @@ class Runner:
         self.utils = Utilities()
         self.mailing = EmailService()
         self.geodata = GeoData()
+        self.diag = Diagnostics()
         
     def scrape_prices_and_details(self,
                     scrape_prodej_byty: Optional[bool] = True,
@@ -30,7 +33,7 @@ class Runner:
         1.) It runs scraping process for 'prodej_byty' and/or 'all' estates.
         2.) After scraping prices, there is a check of missing estate details in DB and JSON files,
         and follow-up scraping of details for missing records.
-        3.) For new estate_details files there is GeoData obtained and saved
+        3.) For new estate_details files, there are GeoData obtained and saved
         """
         full_datetime, date_to_save = self.utils.generate_timestamp()
         logger.info(f'Starting scraping process.')
@@ -38,7 +41,10 @@ class Runner:
         # scrape all with filter
         if scrape_prodej_byty:
             logger.info(f'Running scraper for Prodeje - Byty.')
-            data_prodej_byty = self.scraper.scrape_all_with_filter(timestamp=full_datetime, category_main_cb=1,category_type_cb=1)
+            data_prodej_byty = self.scraper.scrape_all_with_filter(timestamp=full_datetime, 
+                                                                   category_main_cb=1,
+                                                                   category_type_cb=1
+                                                                   )
             df_data_prodej_byty = pd.DataFrame(data_prodej_byty)
             self.utils.safe_save_csv(df_data_prodej_byty, f"data_{date_to_save}")
         
@@ -52,8 +58,8 @@ class Runner:
         #TODO: for scrape_prodej_byty, resp for scrape_all ..
         # ? check existing codes in DB. 
         if scrape_prodej_byty:
-            existing_codes = set(self.data_manager.get_all_rows("estate_detail")["code"])
-            df_codes = set(df_data_prodej_byty["code"].unique())
+            existing_codes = set(self.data_manager.get_all_rows("estate_detail")["estate_id"])
+            df_codes = set(df_data_prodej_byty["estate_id"].unique())
             
             #df_missing = [x for x in df_codes if x not in list(existing_codes)]
             df_missing = df_codes - existing_codes
@@ -73,8 +79,8 @@ class Runner:
         # TODO: and saving file name maybe?
         # TODO: or simply just run one function twice, based on argument there will be file_name.
         if scrape_all:
-            existing_codes = set(self.data_manager.get_all_rows("estate_detail")["code"])
-            df_codes = set(df_data_all["code"].unique())
+            existing_codes = set(self.data_manager.get_all_rows("estate_detail")["estate_id"])
+            df_codes = set(df_data_all["estate_id"].unique())
             
             df_missing = df_codes - existing_codes
             
@@ -87,7 +93,7 @@ class Runner:
             else:
                 logger.info(f'No need to scrape missing estate details for ALL')        
 
-    #TODO: tím že je to oděělené od scrapingu, je nutné to mít jako samostatný run, nebo nechat jako util?
+    #TODO: tím že je to odělené od scrapingu, je nutné to mít jako samostatný run, nebo nechat jako util?
     def update_geodata(self, list_of_jsons=None):
         #? Get Geodata for all JSON files that do not have any, usually for new estate_detail scraped.
         logger.info(f'Updating GeoData')
@@ -108,8 +114,8 @@ class Runner:
         df = self.data_manager.get_all_rows("estate_detail")
         logger.info(f'Already {len(df)} rows in estate_detail.')
         
-        existing_codes = df["code"].unique() if len(df) > 0 else []
-        df_new = df_new[~df_new["code"].isin(existing_codes)]
+        existing_codes = df["estate_id"].unique() if len(df) > 0 else []
+        df_new = df_new[~df_new["estate_id"].isin(existing_codes)]
         logger.info(f'Prepared {len(df_new)} new rows.')
                 
         #? Take offers which codes are not yet in DB and load them into DB
@@ -149,7 +155,7 @@ class Runner:
                             scrape_prodej_byty: Optional[bool] = True,
                             scrape_all: Optional[bool] = True)->pd.DataFrame:
         """
-        This is a combination of Scraping, Follo-up scraping, GeoPandas, and Updating both DB tables with new rows.
+        This is a combination of Scraping, Follow-up scraping, GeoPandas, and Updating both DB tables with new rows.
         """
         logger.info(f'STARTING complete process of data gathering.')
 
@@ -161,7 +167,12 @@ class Runner:
         self.input_all_estates_to_db()
         self.input_all_prices_to_db()
         
+        result = self.diag.summary_new_estates()
+        self.mailing.send_email(subject=f'SCRAPING SREALITY SUMMARY for {result["Last Date"]}',
+                                message_text=json.dumps(result))
+        
+        
         logger.info(f'FINISHING complete process of data gathering.')
 
     def diagnostics_after_run(self):
-        self.diagnotstics.diagnostics.count_new_estates
+        raise NotImplementedError
