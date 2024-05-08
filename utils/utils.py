@@ -3,6 +3,7 @@ import os
 import json
 import pandas as pd
 from tqdm import tqdm
+import unicodedata
 
 from config import Config
 
@@ -35,13 +36,22 @@ class Utilities:
             df.to_csv(file_path, sep=";", encoding="utf-8", index=False)
             
     def translate_type_of_building(self, code_category_main_cb):
-        return self.cf.type_of_building[str(code_category_main_cb)]
+        if code_category_main_cb is not None and not pd.isna(code_category_main_cb):
+            return self.cf.type_of_building[str(int(code_category_main_cb))]
+        else:
+            return None
     
     def translate_type_of_deal(self, code_category_type_cb):
-        return self.cf.type_of_deal[str(code_category_type_cb)]
+        if code_category_type_cb is not None and not pd.isna(code_category_type_cb):
+            return self.cf.type_of_deal[str(int(code_category_type_cb))]
+        else:
+            return None
     
     def translate_type_of_rooms(self, code_category_sub_cb):
-        return self.cf.type_of_rooms[str(code_category_sub_cb)]
+        if code_category_sub_cb is not None and not pd.isna(code_category_sub_cb):
+            return self.cf.type_of_rooms[str(int(code_category_sub_cb))]
+        else:
+            return None
     
     def compare_codes_to_existing_jsons(self, codes_not_found: list[str]) -> list[str]:
         """
@@ -55,8 +65,9 @@ class Utilities:
 
             with open(file_path, 'r') as file:
                 data = json.load(file)
-            
-            codes_from_json = [str(item['code']) for item in data]
+                
+            #TODO: this might backfire, this used to be code before for all
+            codes_from_json = [str(item['estate_id']) for item in data]
     
             codes_not_found = [x for x in codes_not_found if x not in codes_from_json]
                     
@@ -78,6 +89,7 @@ class Utilities:
         folder_with_jsons_files= f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.estate_details_folder}"
         files = os.listdir(folder_with_jsons_files)
         
+        #? first prepare list of DFs, concat after - it's much faster
         dfs = []
         print("PREPARING Estate details JSONs to DF")
         for file_name in tqdm(files):
@@ -104,23 +116,28 @@ class Utilities:
         for c in ["note_about_price", "id_of_order", "last_update", "material",
                   "age_of_building", "ownership_type", "floor", "usable_area",
                   "floor_area", "energy_efficiency_rating", "no_barriers", "start_of_offer",
+                  "locality_url" #? unfortunately unavailable for old scraped data, but necessary
                   ]:
             if c not in final_df.columns:
                 final_df[c] = "-"
         
+        final_df.rename(columns={"code": "estate_id"})
+        
         #TODO: create estate_url as a combination of pronajem, byt, mistnosti, locality_url, estate_id
         #? detail/pronajem/byt/2+1/bilina-teplicke-predmesti-sidliste-shd/3980883276
         
-        final_df['category_main_cb_translated'] = final_df['category_main_cb'].apply(self.translate_type_of_building)
-        final_df['category_type_cb_translated'] = final_df['category_type_cb'].apply(self.translate_type_of_deal)
-        final_df['category_sub_cb_translated'] = final_df['category_sub_cb'].apply(self.translate_type_of_rooms)
- 
+        final_df['category_main_cb_translated'] = final_df['category_main_cb'].apply(self.translate_type_of_building).apply(self.translate_unicode)
+        final_df['category_type_cb_translated'] = final_df['category_type_cb'].apply(self.translate_type_of_deal).apply(self.translate_unicode)
+        final_df['category_sub_cb_translated'] = final_df['category_sub_cb'].apply(self.translate_type_of_rooms).apply(self.translate_unicode)
+        final_df["locality_url"] = final_df["locality_url"].apply(self.remove_trailing_dash)
+    
+        #TODO: fix the issue with locality name with spaces - this replace doesnt work
         final_df["estate_url"] = "https://www.sreality.cz/detail/" + \
                                 final_df["category_type_cb_translated"].astype(str) + "/" + \
                                 final_df["category_main_cb_translated"].astype(str) + "/" + \
                                 final_df["category_sub_cb_translated"].astype(str) + "/" + \
-                                final_df["locality_url"].astype(str) + "/" + \
-                                final_df["code"].astype(str)
+                                final_df["locality_url"].str.replace(' ', '-') + "/" + \
+                                final_df["estate_id"].astype(str)
         
         final_df.fillna("-", inplace=True)
         
@@ -160,4 +177,9 @@ class Utilities:
     def identify_suspicious_offers(self, df: pd.DataFrame) -> pd.DataFrame:
         raise NotImplementedError
     
-   
+    #TODO: má to být self? nebo static?
+    def translate_unicode(self,text: str) -> str:
+            return unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8')
+
+    def remove_trailing_dash(self, text: str) -> str:
+        return text.rstrip('-')
