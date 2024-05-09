@@ -15,7 +15,7 @@ class GeoData:
     def __init__(self) -> None: 
         self.cf = Config()  
     
-    def get_location(self, lat: float, lon: float)-> str:
+    def _get_location(self, lat: float, lon: float)-> str:
         try:
             geolocator = Nominatim(timeout = 20, user_agent = "JZ_Sreality")   # Pomohlo změnit jméno, proti "Error 403" !!        
             geo_input = ", ".join([str(lat), str(lon)])
@@ -23,7 +23,7 @@ class GeoData:
         except:
             return "-, -, -, -, -, - ,-"
     
-    def parse_location(self, location: str) -> dict: 
+    def _parse_location(self, location: str) -> dict: 
         try:
             items = location.split(",")
             
@@ -59,14 +59,13 @@ class GeoData:
                 "kraj": "-"
             }
      
-    def assign_location_to_df(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _assign_location_to_df(self, df: pd.DataFrame) -> pd.DataFrame:
         
-        #TODO: toto mi failuje, protože to je apply, tak nevidím kde přesně. bylo to na souboru kde byl jediný estate a ten neměl GPS. pak vůbec neexistuje sloupec, a není to ani jako None, je to horší)
         #? nice way how to use tqdm for apply operations ! (progress_apply instead of apply)
         tqdm.pandas(desc="Processing Locations", total=len(df))
-        df["locality_to_parse"] = df.progress_apply(lambda row: self.get_location(row["locality_gps_lat"], row["locality_gps_lon"]), axis=1)
+        df["locality_to_parse"] = df.progress_apply(lambda row: self._get_location(row["locality_gps_lat"], row["locality_gps_lon"]), axis=1)
         
-        df[['locality', 'city', 'district', 'region']] = df['locality_to_parse'].apply(lambda x: pd.Series(self.parse_location(x)))
+        df[['locality', 'city', 'district', 'region']] = df['locality_to_parse'].apply(lambda x: pd.Series(self._parse_location(x)))
 
         return df
     
@@ -93,14 +92,25 @@ class GeoData:
             with open(source_path, 'r') as file:
                 data = json.load(file)
                 df = pd.DataFrame(data)
-
-            enriched_df = self.assign_location_to_df(df)
             
-            data_to_save = enriched_df[["locality_gps_lat", "locality_gps_lon",
-                                        "locality", "city", "district", "region"
-                                        ]].to_dict(orient='records')
+            #? for case when there is no locality_gps_lat for all estates in json
+            try:
+                enriched_df = self._assign_location_to_df(df)
             
-            with open(target_path, 'w') as json_file:
-                json.dump(data_to_save, json_file, indent=4)
+                data_to_save = enriched_df[["locality_gps_lat", "locality_gps_lon",
+                                            "locality", "city", "district", "region"
+                                            ]].to_dict(orient='records')
+                
+                with open(target_path, 'w') as json_file:
+                    json.dump(data_to_save, json_file, indent=4)
+                            
+            except:
+                #? in that case, the result needs to have same length as original estate_detail json to ZIP Later
+                data_to_save = [{} for _ in range(len(df))]
+                
+                with open(target_path, 'w') as json_file:
+                    json.dump(data_to_save, json_file, indent=4)
+            
+            
     
         
