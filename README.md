@@ -1,19 +1,24 @@
 # Sreality
 #### Web-scraping Project - costs of houses in the Czech Republic on the biggest real-estate web - "Sreality.cz"
-## OLD INFO:
-* Approximately 12.000 items scraped every week and added to total - "data_prodej_byty_souhrn.xlsx"
-* PowerBI file with some interactive visualizations for 29.3.20-1.3.201 - "Vizualizace.pbix"
-* Four notebooks: Scraper, Cleaning & Dropping, Visualizaton, and All in one.
-* To run scraping, one needs to have an up-to-date chromedriver.exe in the same folder as Jupyter notebook
 
-## NEW INFO:
 ### Structure of this project:
 - MakeFile
 - Requirements: 
 - scraper: responsible for obtaining the data, there are few options: ...
 - utils: ..., Geodata 
 - db_managment: ..
-#### xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+### Good to know about Sreality:
+- there is no official documentation for the API
+- I used two main sources:
+    - https://dspace.cvut.cz/bitstream/handle/10467/103384/F8-BP-2021-Malach-Ondrej-thesis.pdf
+    - https://dspace.cvut.cz/bitstream/handle/10467/111141/F8-DP-2023-Drska-Vojtech-thesis.pdf
+
+- header is necessary for requests, e.g. {"User-Agent": "Mozilla/5.0"} If there is None, data is stil provided by request, BUT the data is RANDOMIZED (prices, size, GPS) eventhough it might still looks valid !!!
+- limitation to display estates per page = 999 - enough to get unique id + price, but not all the details, so the second API is needed for details.
+- limitation to list estates is 60k, meaning one can get data from url ending with "&per_page=999&page=60", but not "&per_page=999&page=61", neither "&per_page=500&page=121" etc.
+
+ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 * 12.3.- 22.4.2020 = First outputs, preparation of the automatized process.
 * 24.-26.4. Visualizations in PowerBI
 * 27.-28.4. Creating representative .ipynb files with comments
@@ -37,3 +42,4 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 * 5.5. Diagnostics: new batch summary, price changes as mail
 * 6.5. scraping info to provide URL of the estate
 * 7.5. rework of estate_id, diagnostics provide URL and percentage change of price
+* 10.5. separating scrapers per category to avoid limit of 60k offers

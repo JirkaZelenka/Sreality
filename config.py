@@ -19,11 +19,24 @@ class Config:
                                     "receiver_email": os.getenv("receiver_email")
                                     }
         
+        self.urls_to_scrape = {"all"           : "https://www.sreality.cz/api/cs/v2/estates" 
+                            ,"prodej_byty"     : "https://www.sreality.cz/api/cs/v2/estates?category_type_cb=1&category_main_cb=1"
+                            ,"prodej_domy"     : "https://www.sreality.cz/api/cs/v2/estates?category_type_cb=1&category_main_cb=2"
+                            ,"prodej_pozemky"  : "https://www.sreality.cz/api/cs/v2/estates?category_type_cb=1&category_main_cb=3"
+                            ,"prodej_komercni" : "https://www.sreality.cz/api/cs/v2/estates?category_type_cb=1&category_main_cb=4"
+                            ,"prodej_ostatni"  : "https://www.sreality.cz/api/cs/v2/estates?category_type_cb=1&category_main_cb=5"
+                            ,"pronajem_byty"     : "https://www.sreality.cz/api/cs/v2/estates?category_type_cb=2&category_main_cb=1"
+                            ,"pronajem_domy"     : "https://www.sreality.cz/api/cs/v2/estates?category_type_cb=2&category_main_cb=2"
+                            ,"pronajem_pozemky"  : "https://www.sreality.cz/api/cs/v2/estates?category_type_cb=2&category_main_cb=3"
+                            ,"pronajem_komercni" : "https://www.sreality.cz/api/cs/v2/estates?category_type_cb=2&category_main_cb=4"
+                            ,"pronajem_ostatni"  : "https://www.sreality.cz/api/cs/v2/estates?category_type_cb=2&category_main_cb=5"
+                            }
+        
         # category_type_cb
         self.type_of_deal={"1": "prodej",
                            "2": "pronájem",
                            "3": "dražba",
-                           "4": "prodej podílu",
+                           "4": "podíly", # oficially "prodej podílu", but "podily" fots the URL
                            }
         
         # category_main_cb
@@ -48,8 +61,13 @@ class Config:
                             "11": "5+1",
                             "12": "6 pokoju a vic",
                             "16": "atypické",
+                            "18": "komerční", #
                             "19": "stavební parcela",
+                            "20": "pole", #
+                            "21": "les", #
+                            "22": "louka", #
                             "23": "zahrada",
+                            "24": "ostatní pozemky", #
                             "25": "kancelář", #
                             "26": "sklad", #
                             "27": "výrobní hala", #
@@ -68,7 +86,9 @@ class Config:
                             "40": "projekt na klíč", #
                             "43": "chalupa",
                             "44": "zemědělská usedlost", #
+                            "46": "rybník",
                             "47": "pronájem pokoje",
+                            "48": "pozemek - eng", #
                             "49": "virtuální kancelář", #
                             "50": "vinný sklep", #
                             "51": "půdní prostor", #
@@ -150,3 +170,4 @@ class Config:
                     ); 
                     """                
         }
+        

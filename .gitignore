@@ -15,5 +15,6 @@ notes.md
 /data_*/
 .db
 all_data.db
+price_history_loaded.txt
 # Logs
 scraping.log

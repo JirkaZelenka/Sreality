@@ -25,12 +25,10 @@ class Runner:
         self.geodata = GeoData()
         self.diag = Diagnostics()
         
-    def scrape_prices_and_details(self,
-                    scrape_prodej_byty: Optional[bool] = True,
-                    scrape_all: Optional[bool] = True
-                    ) -> pd.DataFrame:
+    def scrape_prices_and_details(self, combinations: list["str"]) -> None:
         """
-        1.) It runs scraping process for 'prodej_byty' and/or 'all' estates.
+        1.) It runs scraping process for defined combinations of interest, such as "prodej_byty".
+            Avoiding to scrape "all", as there is a limitation of 60k offers available out of 95k
         2.) After scraping prices, there is a check of missing estate details in DB and JSON files,
         and follow-up scraping of details for missing records.
         3.) For new estate_details files, there are GeoData obtained and saved
@@ -38,60 +36,44 @@ class Runner:
         full_datetime, date_to_save = self.utils.generate_timestamp()
         logger.info(f'Starting scraping process.')
         
-        # scrape all with filter
-        if scrape_prodej_byty:
-            logger.info(f'Running scraper for Prodeje - Byty.')
-            data_prodej_byty = self.scraper.scrape_all_with_filter(timestamp=full_datetime, 
-                                                                   category_main_cb=1,
-                                                                   category_type_cb=1
-                                                                   )
-            df_data_prodej_byty = pd.DataFrame(data_prodej_byty)
-            self.utils.safe_save_csv(df_data_prodej_byty, f"data_{date_to_save}")
+        data_dict = self.scraper.scrape_multiple_sections(combinations, full_datetime)
+        logger.info(f'Data scraped for all combinations.')
         
-        # scrape basically all
-        if scrape_all:
-            logger.info(f'Running scraper for All')
-            data_all = self.scraper.scrape_all_with_filter(timestamp=full_datetime)
-            df_data_all = pd.DataFrame(data_all)
-            self.utils.safe_save_csv(df_data_all, f"data_all_{date_to_save}")
+        #TODO: missing codes. co nesesbírám hned poté, tak můůžu později, ale jen okud na něj narazím znovu na ten objekt
+        for combination in combinations:
+            try:
+                data = data_dict[combination]
+                df_data = pd.DataFrame(data)
+                self.utils.safe_save_csv(df_data, 
+                                         f"data_{combination}_{date_to_save}")
+            except Exception as e:
+                logger.error(f'There is no key {combination} in returned data: {e}')   
         
-        #TODO: for scrape_prodej_byty, resp for scrape_all ..
-        # ? check existing codes in DB. 
-        if scrape_prodej_byty:
-            existing_codes = set(self.data_manager.get_all_rows("estate_detail")["estate_id"])
-            df_codes = set(df_data_prodej_byty["estate_id"].unique())
-            
-            #df_missing = [x for x in df_codes if x not in list(existing_codes)]
-            df_missing = df_codes - existing_codes
-            
-            # ? check existing codes in JSON - might be not processed previously
-            df_missing = self.utils.compare_codes_to_existing_jsons(df_missing)
-            logger.info(f'There are {len(df_missing)} new codes to scrape')
+        #TODO: částečná duplikace postupu, ale..asi ok
+        for combination in combinations:
+            try:
+                data = data_dict[combination]
+                df_data = pd.DataFrame(data)
+                # ? check existing codes in DB. 
+                existing_codes = set(self.data_manager.get_all_rows("estate_detail")["estate_id"])
+                df_codes = set(df_data["estate_id"].unique())
+                
+                #df_missing = [x for x in df_codes if x not in list(existing_codes)]
+                df_missing = df_codes - existing_codes
+                
+                # ? check existing codes in JSON - might be not processed previously
+                df_missing = self.utils.compare_codes_to_existing_jsons(df_missing)
+                logger.info(f'There are {len(df_missing)} new codes to scrape for {combination}.')
 
-            # ? this handles the case when empty JSON would be created and not read by GeoData
-            if len(df_missing) > 0:
-                self.scraper.scrape_specific_estates(df_missing, full_datetime)
-                logger.info(f'Finished scraping missing estate details')        
-            else:
-                logger.info(f'No need to scrape missing estate details')             
-            
-        # TODO: deduplicate this section, the only difference is data_all vs df_data_prodej_byty
-        # TODO: and saving file name maybe?
-        # TODO: or simply just run one function twice, based on argument there will be file_name.
-        if scrape_all:
-            existing_codes = set(self.data_manager.get_all_rows("estate_detail")["estate_id"])
-            df_codes = set(df_data_all["estate_id"].unique())
-            
-            df_missing = df_codes - existing_codes
-            
-            df_missing = self.utils.compare_codes_to_existing_jsons(df_missing)
-            logger.info(f'There are {len(df_missing)} new codes to scrape.')
-
-            if len(df_missing) > 0:
-                self.scraper.scrape_specific_estates(df_missing, full_datetime)
-                logger.info(f'Finished scraping missing estate details for ALL')        
-            else:
-                logger.info(f'No need to scrape missing estate details for ALL')        
+                # ? this handles the case when empty JSON would be created and not read by GeoData
+                if len(df_missing) > 0:
+                    self.scraper._scrape_specific_estates(df_missing, full_datetime)
+                    logger.info(f'Finished scraping missing estate details for {combination}.')        
+                else:
+                    logger.info(f'No need to scrape missing estate details for {combination}.')             
+            except Exception as e:
+                logger.error(f'Some error occured during scraping estate_details for {combination}: {e}') 
+                 
 
     #TODO: tím že je to odělené od scrapingu, je nutné to mít jako samostatný run, nebo nechat jako util?
     def update_geodata(self, list_of_jsons=None):
@@ -132,6 +114,7 @@ class Runner:
         """
         
         #? Prepare all CSV with prices to df, and compare to existing DB
+        #TODO: based on the file with names of files that are already loaded?
         logger.info(f'Starting processing CSVs to price_history table.')
         df_new = self.utils.prepare_price_history_csv_to_df()
         df_new = df_new.drop_duplicates()
@@ -152,15 +135,14 @@ class Runner:
     
     #? Combination of scraping, GeoPandas, and Updating DB
     def run_complete_scraping(self,
-                            scrape_prodej_byty: Optional[bool] = True,
-                            scrape_all: Optional[bool] = True)->pd.DataFrame:
+                              combinations: list["str"]
+                              )->pd.DataFrame:
         """
         This is a combination of Scraping, Follow-up scraping, GeoPandas, and Updating both DB tables with new rows.
         """
         logger.info(f'STARTING complete process of data gathering.')
 
-        self.scrape_prices_and_details(scrape_prodej_byty=scrape_prodej_byty,
-                                       scrape_all=scrape_all)
+        self.scrape_prices_and_details(combinations)
         
         self.update_geodata(list_of_jsons=None)
         
