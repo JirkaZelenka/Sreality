@@ -123,13 +123,11 @@ class Utilities:
         
         final_df.rename(columns={"code": "estate_id"})
         
-        #TODO: create estate_url as a combination of pronajem, byt, mistnosti, locality_url, estate_id
-        #? detail/pronajem/byt/2+1/bilina-teplicke-predmesti-sidliste-shd/3980883276
-        
+        #? detail/pronajem/byt/2+1/bilina-teplicke-predmesti-sidliste-shd/3980883276  
         final_df['category_main_cb_translated'] = final_df['category_main_cb'].apply(self.translate_type_of_building).apply(self.translate_unicode)
         final_df['category_type_cb_translated'] = final_df['category_type_cb'].apply(self.translate_type_of_deal).apply(self.translate_unicode)
         final_df['category_sub_cb_translated'] = final_df['category_sub_cb'].apply(self.translate_type_of_rooms).apply(self.translate_unicode)
-        final_df["locality_url"] = final_df["locality_url"].apply(self.remove_trailing_dash)
+        final_df["locality_url"] = final_df["locality_url"].astype(str).apply(self.remove_trailing_dash)
     
         #TODO: fix the issue with locality name with spaces - this replace doesnt work
         final_df["estate_url"] = "https://www.sreality.cz/detail/" + \
@@ -152,6 +150,17 @@ class Utilities:
         folder_with_csv_files= f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.scraped_prices_folder}"
         files = os.listdir(folder_with_csv_files)
         
+        #TODO: check list of existing CSV files previously upload, and do not load them at all)
+        """
+        with open(f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.scraped_prices_folder}/price_hisory_loaded.txt", 'r') as f:
+            file_names = f.read().splitlines()
+        
+        
+        with open(file_path, 'w') as f:
+            for file_name in file_names:
+                f.write(file_name + '\n')
+        """
+        
         dfs = []
         print("PREPARING Price history CSVs to DF")
         for file_name in tqdm(files):
@@ -171,15 +180,18 @@ class Utilities:
 
         return df 
     
+    #TODO: má to být self? nebo static?
+    def translate_unicode(self,text: str) -> str:
+        if text is None: return " "
+        else: return unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8')
+
+    def remove_trailing_dash(self, text: str) -> str:
+        return text.rstrip('-')
+    
+    
+    
     def scrape_incomplete_estates(self, df: pd.DataFrame) -> pd.DataFrame:
         raise NotImplementedError
     
     def identify_suspicious_offers(self, df: pd.DataFrame) -> pd.DataFrame:
         raise NotImplementedError
-    
-    #TODO: má to být self? nebo static?
-    def translate_unicode(self,text: str) -> str:
-            return unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8')
-
-    def remove_trailing_dash(self, text: str) -> str:
-        return text.rstrip('-')
