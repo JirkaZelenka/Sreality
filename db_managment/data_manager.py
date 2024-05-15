@@ -1,10 +1,6 @@
-from datetime import datetime
 import pandas as pd
 from tqdm import tqdm
-import re
-
 import sqlite3
-import os
 
 from config import Config 
 
@@ -26,7 +22,7 @@ class DataManager:
             conn = sqlite3.connect(f"{self.cf.project_path}/{self.cf.db_name}")
             return conn
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error connecting to database: {e}') 
+            logger.error(f'Error connecting to database: {e}') 
 
             return None
 
@@ -40,7 +36,7 @@ class DataManager:
             return df
         
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error loading rows from table {table_name}: {e}') 
+            logger.error(f'Error loading rows from table {table_name}: {e}') 
             conn.rollback()
         
         conn.close()
@@ -55,7 +51,7 @@ class DataManager:
             return df
         
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error loading rows from table {table_name} for timestamp {timestamp}: {e}') 
+            logger.error(f'Error loading rows from table {table_name} for timestamp {timestamp}: {e}') 
             conn.rollback()
         
         conn.close()
@@ -69,7 +65,7 @@ class DataManager:
             conn.commit()
             cursor.close()
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error clearing table {table_name}: {e}') 
+            logger.error(f'Error clearing table {table_name}: {e}') 
             conn.rollback()
         
         conn.close()
@@ -83,7 +79,7 @@ class DataManager:
             conn.commit()
             cursor.close()
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error dropping table {table_name}: {e}') 
+            logger.error(f'Error dropping table {table_name}: {e}') 
             conn.rollback()
         
         conn.close()
@@ -99,7 +95,7 @@ class DataManager:
             conn.commit()
             cursor.close()
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error creating table {table_name}: {e}') 
+            logger.error(f'Error creating table {table_name}: {e}') 
             conn.rollback()
         
         conn.close()
@@ -196,7 +192,7 @@ class DataManager:
             conn.commit()
 
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error inserting offer: {e}')        
+            logger.error(f'Error inserting offer: {e}')        
             conn.rollback()
             
         conn.close()
@@ -228,7 +224,7 @@ class DataManager:
             conn.commit()
 
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error updating offer: {e}')        
+            logger.error(f'Error updating offer: {e}')        
             conn.rollback()
             
         conn.close()
@@ -258,7 +254,7 @@ class DataManager:
             conn.commit()
 
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error inserting offer: {e}')        
+            logger.error(f'Error inserting offer: {e}')        
             conn.rollback()
             
         conn.close()
