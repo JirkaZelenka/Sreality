@@ -1,5 +1,7 @@
+apscheduler
 datetime
 db-sqlite3
+fastapi
 fsspec
 geopy
 ipykernel
@@ -9,4 +11,4 @@ requests
 scheduler
 tqdm
 typing
-unicodedata
+unicodedata2

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FastAPI Documentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-right: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>FastAPI Documentation</h1>
+        <h2>Endpoints:</h2>
+        <button class="button" onclick="sendMail()">Send Email</button>
+        <button class="button" onclick="getStats()">Get Stats</button>
+        <h2>Scraping Log:</h2>
+        <pre>{{ log_content }}</pre>
+    </div>
+
+    <script>
+        function sendMail() {
+            fetch('/email/', { method: 'GET' })
+                .then(response => {
+                    if (response.ok) {
+                        alert("Email sent successfully!");
+                    } else {
+                        alert("Failed to send email.");
+                    }
+                });
+        }
+
+        function getStats() {
+            fetch('/get_stats/')
+                .then(response => response.json())
+                .then(data => {
+                    alert("Statistics:\n" + JSON.stringify(data));
+                });
+        }
+    </script>
+</body>
+</html>
