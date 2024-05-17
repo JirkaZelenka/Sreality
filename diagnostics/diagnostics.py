@@ -25,8 +25,7 @@ class Diagnostics:
         timestamps = df["crawled_at"].unique()
         timestamp1 = max(timestamps) # the newest timestamp
         timestamp2 = max([x for x in timestamps if x != timestamp1])
-        result["Last Date"] = timestamp1
-        result["Previous Date"] = timestamp2
+        result["Last Date"], result["Previous Date"] = timestamp1, timestamp2
         
         result["New estates observed"] = len(df[df['crawled_at'] == timestamp1])
         
@@ -57,7 +56,7 @@ class Diagnostics:
         result["Estates that are more expensive"] = int(estates_higher_price['estate_id'].count())
         result["Estates that are cheaper"] = int(estates_lower_price['estate_id'].count())
         
-        #TODO: sort by price_growth_perc from lowest (-35 % discount), add URLs
+        #TODO: sort by price_growth_perc from lowest (negative growth = discount), add URLs
         
         estate = estates_lower_price[["price_growth_perc", "estate_url"]].sort_values(by="price_growth_perc", ascending=True)
         estate["estate_url_combined"] = estate["price_growth_perc"].astype(str) + "% = " + estate["estate_url"].astype(str)

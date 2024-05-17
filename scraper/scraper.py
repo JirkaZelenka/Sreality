@@ -59,7 +59,7 @@ class SrealityScraper:
         for combo in combinations:
             logger.info(f'Running scraper for {combo}')
             
-            num_pages = (counts[combo]//per_page) + 1
+            num_pages = (counts[f"count_{combo}"]//per_page) + 1
             
             data = self._scrape_url(urls[combo],
                                     num_pages, 
