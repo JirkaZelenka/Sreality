@@ -18,7 +18,7 @@ class Utilities:
     def generate_timestamp() -> str:
         current_datetime = datetime.now()
         full_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
-        date_to_save = current_datetime.strftime("%Y%m%d_%H%M")
+        date_to_save = current_datetime.strftime("%Y%m%d_%H%M%S")
                 
         return full_datetime, date_to_save
     
