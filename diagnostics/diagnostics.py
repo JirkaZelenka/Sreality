@@ -14,6 +14,18 @@ class Diagnostics:
     def __init__(self) -> None: 
         self.cf = Config()   
         self.data_manager = DataManager()
+        
+    def describe_database(self) -> pd.DataFrame:
+                
+        estate_stats = self.data_manager.get_count_estates()
+        #TODO: udělat i price_stats, až upravím kvalitu a deduplikuju db
+        #price_stats = self.data_manager.get_count_prices()
+        unique_estates = estate_stats["unique estate count"].values[0]
+                
+        logger.info(f'Number of rows in estate_detail table: {unique_estates}')
+        #logger.info(f'Number of rows in price_history table: {price_records_count}')
+    
+        return estate_stats
     
     def summary_new_estates(self) -> dict:
         

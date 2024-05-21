@@ -18,6 +18,14 @@
 - limitation to display estates per page = 999 - enough to get unique id + price, but not all the details, so the second API is needed for details.
 - limitation to list estates is 60k, meaning one can get data from url ending with "&per_page=999&page=60", but not "&per_page=999&page=61", neither "&per_page=500&page=121" etc.
 
+|       | A    | B    |
+|-------------|---  -|------|
+| 123         | ✅   | ✅  |
+| 456         | ✅   | ❌  |
+| 124         | ❌   | ✅  |
+| 324         | ❌   | ✅  |
+| 225         | ❌   | ✅  |
+
  xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 * 12.3.- 22.4.2020 = First outputs, preparation of the automatized process.
 * 24.-26.4. Visualizations in PowerBI
@@ -43,3 +51,5 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 * 6.5. scraping info to provide URL of the estate
 * 7.5. rework of estate_id, diagnostics provide URL and percentage change of price
 * 10.5. separating scrapers per category to avoid limit of 60k offers
+* 15-17.5. started using FastAPI, main.py + main.html
+* 19.5. main page formatting statistics + refreshing options 

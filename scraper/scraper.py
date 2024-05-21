@@ -17,27 +17,27 @@ class SrealityScraper:
         
         result = {}
         urls_to_count = {
-        "count_all"              : "https://www.sreality.cz/api/cs/v2/estates/count" 
-        ,"count_prodej_byty"     : "https://www.sreality.cz/api/cs/v2/estates/count?category_type_cb=1&category_main_cb=1"
-        ,"count_prodej_domy"     : "https://www.sreality.cz/api/cs/v2/estates/count?category_type_cb=1&category_main_cb=2"
-        ,"count_prodej_pozemky"  : "https://www.sreality.cz/api/cs/v2/estates/count?category_type_cb=1&category_main_cb=3"
-        ,"count_prodej_komercni" : "https://www.sreality.cz/api/cs/v2/estates/count?category_type_cb=1&category_main_cb=4"
-        ,"count_prodej_ostatni"  : "https://www.sreality.cz/api/cs/v2/estates/count?category_type_cb=1&category_main_cb=5"
-        ,"count_pronajem_byty"   : "https://www.sreality.cz/api/cs/v2/estates/count?category_type_cb=2&category_main_cb=1"
-        ,"count_pronajem_domy"   : "https://www.sreality.cz/api/cs/v2/estates/count?category_type_cb=2&category_main_cb=2"
+        "all"              : "https://www.sreality.cz/api/cs/v2/estates/count" 
+        ,"prodej_byty"     : "https://www.sreality.cz/api/cs/v2/estates/count?category_type_cb=1&category_main_cb=1"
+        ,"prodej_domy"     : "https://www.sreality.cz/api/cs/v2/estates/count?category_type_cb=1&category_main_cb=2"
+        ,"prodej_pozemky"  : "https://www.sreality.cz/api/cs/v2/estates/count?category_type_cb=1&category_main_cb=3"
+        ,"prodej_komercni" : "https://www.sreality.cz/api/cs/v2/estates/count?category_type_cb=1&category_main_cb=4"
+        ,"prodej_ostatni"  : "https://www.sreality.cz/api/cs/v2/estates/count?category_type_cb=1&category_main_cb=5"
+        ,"pronajem_byty"   : "https://www.sreality.cz/api/cs/v2/estates/count?category_type_cb=2&category_main_cb=1"
+        ,"pronajem_domy"   : "https://www.sreality.cz/api/cs/v2/estates/count?category_type_cb=2&category_main_cb=2"
         }
         for url in urls_to_count.keys():
             response = requests.get(urls_to_count[url])
             result[url] = response.json()["result_size"]
 
-        logger.info(f'There are {result["count_all"]} Estates in total')
-        logger.info(f'There are {result["count_prodej_byty"]} prodej_byty')
-        logger.info(f'There are {result["count_prodej_domy"]} prodej_domy')
-        logger.info(f'There are {result["count_prodej_pozemky"]} prodej_pozemky')
-        logger.info(f'There are {result["count_prodej_komercni"]} prodej_komercni')
-        logger.info(f'There are {result["count_prodej_ostatni"]} prodej_ostatni')
-        logger.info(f'There are {result["count_pronajem_byty"]} pronajem_byty')
-        logger.info(f'There are {result["count_pronajem_domy"]} pronajem_domy')
+        #logger.info(f'There are {result["all"]} Estates in total')
+        #logger.info(f'There are {result["prodej_byty"]} prodej_byty')
+        #logger.info(f'There are {result["prodej_domy"]} prodej_domy')
+        #logger.info(f'There are {result["prodej_pozemky"]} prodej_pozemky')
+        #logger.info(f'There are {result["prodej_komercni"]} prodej_komercni')
+        #logger.info(f'There are {result["prodej_ostatni"]} prodej_ostatni')
+        #logger.info(f'There are {result["pronajem_byty"]} pronajem_byty')
+        #logger.info(f'There are {result["pronajem_domy"]} pronajem_domy')
         
         return result
     
@@ -59,7 +59,7 @@ class SrealityScraper:
         for combo in combinations:
             logger.info(f'Running scraper for {combo}')
             
-            num_pages = (counts[f"count_{combo}"]//per_page) + 1
+            num_pages = (counts[f"{combo}"]//per_page) + 1
             
             data = self._scrape_url(urls[combo],
                                     num_pages, 
