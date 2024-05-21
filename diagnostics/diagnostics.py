@@ -18,12 +18,15 @@ class Diagnostics:
     def describe_database(self) -> pd.DataFrame:
                 
         estate_stats = self.data_manager.get_count_estates()
-        #TODO: udělat i price_stats, až upravím kvalitu a deduplikuju db
-        #price_stats = self.data_manager.get_count_prices()
         unique_estates = estate_stats["unique estate count"].values[0]
-                
-        logger.info(f'Number of rows in estate_detail table: {unique_estates}')
-        #logger.info(f'Number of rows in price_history table: {price_records_count}')
+        
+        price_stats = self.data_manager.get_count_prices()
+        price_history_row_count = price_stats["all_rows"].values[0]
+        
+        estate_stats["price history rows"] = price_history_row_count
+        
+        logger.info(f'Number of unique rows in estate_detail table: {unique_estates}')
+        logger.info(f'Number of rows in price_history table: {price_history_row_count}')
     
         return estate_stats
     

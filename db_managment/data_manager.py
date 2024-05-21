@@ -32,8 +32,9 @@ class DataManager:
         try:
             f"SELECT * FROM {table_name}"
             
+            #? these names go to the table in the FastAPI
             query = f"""SELECT 
-                        COUNT(*) as 'row count', 
+                        COUNT(*) as 'estate count', 
                         COUNT(DISTINCT estate_id) as 'unique estate count',
                         MIN(DISTINCT DATE(crawled_at)) as 'first day',
                         MAX(DISTINCT DATE(crawled_at)) as 'last day',
@@ -60,11 +61,7 @@ class DataManager:
             f"SELECT * FROM {table_name}"
             
             query = f"""SELECT 
-                        COUNT(*) as 'all_rows',
-                        COUNT(DISTINCT estate_id) as 'počet unikátních objektů',
-                        COUNT(DISTINCT DATE(crawled_at)) as 'počet sledovaných dnů',
-                        MIN(DISTINCT DATE(crawled_at)) as 'první sledovaný den',
-                        MAX(DISTINCT DATE(crawled_at)) as 'poslední sledovaný den'
+                        COUNT(*) as 'all_rows'
                     FROM {table_name};"""            
             
             df = pd.read_sql_query(query, conn)

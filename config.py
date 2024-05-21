@@ -59,43 +59,43 @@ class Config:
                             "9": "4+1",
                             "10": "5+kk",
                             "11": "5+1",
-                            "12": "6 pokoju a vic",
+                            "12": "6-a-vice", # "6 pokoju a vic"
                             "16": "atypické",
                             "18": "komerční", #
-                            "19": "stavební parcela",
+                            "19": "bydleni", # "stavební parcela",
                             "20": "pole", #
                             "21": "les", #
                             "22": "louka", #
                             "23": "zahrada",
-                            "24": "ostatní pozemky", #
+                            "24": "ostatní-pozemky", # 
                             "25": "kancelář", #
                             "26": "sklad", #
-                            "27": "výrobní hala", #
-                            "28": "obchodní prostory",  #
+                            "27": "výrobni-prostor",  # "výrobní hala"
+                            "28": "obchodní-prostor",  #
                             "29": "ubytovací zařízení", #
                             "30": "restaurace", #
-                            "31": "zemědělský objekt", #
-                            "32": "komerční nemovitost", #
+                            "31": "zemědělský", # "zemědělský objekt"
+                            "32": "komercni", # "komerční nemovitost"
                             "33": "chata",
                             "34": "garáž", #
                             "35": "památka", #
-                            "36": "specifický typ nemovitosti", #
+                            "36": "jiné-nemovitosti", # "specifický typ nemovitosti"
                             "37": "rodinný",
-                            "38": "činžovní dům", #
+                            "38": "činžovní-dům", #
                             "39": "vila",
-                            "40": "projekt na klíč", #
+                            "40": "na-klíč", # "projekt na klíč"
                             "43": "chalupa",
-                            "44": "zemědělská usedlost", #
+                            "44": "zemědělská-usedlost", #
                             "46": "rybník",
-                            "47": "pronájem pokoje",
-                            "48": "pozemek - eng", #
-                            "49": "virtuální kancelář", #
-                            "50": "vinný sklep", #
-                            "51": "půdní prostor", #
-                            "52": "garážové stání", #
-                            "53": "mobilheim", #
-                            "54": "vícegenerační dům", #
-                            "56": "ordinace", #
+                            "47": "pokoj", # "pronájem pokoje"
+                            "48": "sady-vinice", #
+                            "49": "virtuální-kancelář", #
+                            "50": "rodinný", # "vinný sklep"
+                            "51": "půdní-prostor", #
+                            "52": "garážové-stání", #
+                            "53": "mobilní-domek", # "mobilheim"
+                            "54": "vícegenerační", #
+                            "56": "komerční", # "ordinace"
                             "57": "apartmány" #
                             }
                 
