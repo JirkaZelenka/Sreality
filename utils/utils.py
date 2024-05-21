@@ -27,7 +27,7 @@ class Utilities:
         file_path = f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.scraped_prices_folder}/{filename}.csv" 
         
         if os.path.exists(file_path):
-            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Name {filename} in {file_path} already exists. Saving as {filename}_SAFE')
+            logger.info(f'Name {filename} in {file_path} already exists. Saving as {filename}_SAFE')
             filename += "_SAFE"
             file_path = f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.scraped_prices_folder}/{filename}.csv" 
             df.to_csv(file_path, sep=";", encoding="utf-8", index=False)
@@ -143,27 +143,25 @@ class Utilities:
     
     def prepare_price_history_csv_to_df(self) -> pd.DataFrame:   
         """
-        Takes all CSV file with price_history.
-        Prepare list of dataframes, and in the end concats them.
+        This loads all file names in price_history folder and compares them with
+        the list of file names in price_history_loaded.txt 
         """
-        
+        list_of_loaded_files = f"{self.cf.project_path}/{self.cf.data_folder}/price_history_loaded.txt"
         folder_with_csv_files= f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.scraped_prices_folder}"
         files = os.listdir(folder_with_csv_files)
         
-        #TODO: check list of existing CSV files previously upload, and do not load them at all)
-        """
-        with open(f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.scraped_prices_folder}/price_hisory_loaded.txt", 'r') as f:
-            file_names = f.read().splitlines()
-        
-        
-        with open(file_path, 'w') as f:
-            for file_name in file_names:
-                f.write(file_name + '\n')
-        """
-        
+        if not os.path.exists(list_of_loaded_files):
+            processed_files = set()  
+        else:
+            with open(list_of_loaded_files, 'r') as file:
+                processed_files = set(line.strip() for line in file)
+                print(f"there are already {len(processed_files)} processed files")   
+                
+        not_processed_files = [x for x in files if x not in processed_files]
+        logger.info(f'Processing {len(not_processed_files)} non-processed files with prices for DB.')
+             
         dfs = []
-        print("PREPARING Price history CSVs to DF")
-        for file_name in tqdm(files):
+        for file_name in tqdm(not_processed_files):
             file_path = os.path.join(folder_with_csv_files, file_name)
 
             try:
@@ -172,13 +170,24 @@ class Utilities:
                     
                 dfs.append(data)
             except:
-                logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: There was an error in file {file_name}')
+                logger.error(f'There was an error in file {file_name}')
                 continue
         
         df = pd.concat(dfs, ignore_index=True)
         df.rename(columns={"code": "estate_id",'timestamp': 'crawled_at'}, inplace=True)
 
-        return df 
+        return df, not_processed_files
+    
+    def write_processed_prices(self, not_processed_files):
+        
+        list_of_loaded_files = f"{self.cf.project_path}/{self.cf.data_folder}/price_history_loaded.txt"
+        
+        for non_processed in not_processed_files:
+            with open(list_of_loaded_files, 'a') as file:
+                file.write(non_processed + '\n')
+        
+        logger.info(f'Newly processed price files were listed.')
+    
     
     #TODO: má to být self? nebo static?
     def translate_unicode(self,text: str) -> str:

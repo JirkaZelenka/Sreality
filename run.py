@@ -72,8 +72,7 @@ class Runner:
                 else:
                     logger.info(f'No need to scrape missing estate details for {combination}.')             
             except Exception as e:
-                logger.error(f'Some error occured during scraping estate_details for {combination}: {e}') 
-                 
+                logger.error(f'Some error occured during scraping estate_details for {combination}: {e}')  
 
     #TODO: tím že je to odělené od scrapingu, je nutné to mít jako samostatný run, nebo nechat jako util?
     def update_geodata(self, list_of_jsons=None):
@@ -82,7 +81,6 @@ class Runner:
         self.geodata.enrich_jsons_with_geodata(list_of_jsons=list_of_jsons)
         logger.info(f'Updating GeoData Done')
         
-    #TODO: pracovat pouze s NOVÝMI, nebo jinak označenými JSONy. Nikoliv merge all a pak porovnej?
     def input_all_estates_to_db(self):
         """
         This process takes all existing JSONs with estate details, compare unique codes to those in database,
@@ -107,6 +105,7 @@ class Runner:
         else:
             logger.info(f'No need to insert into estate_detail. DONE.')
 
+    #TODO: pracovat pouze s NOVÝMI, nebo jinak označenými JSONy. Nikoliv merge all a pak porovnej?
     def input_all_prices_to_db(self):
         """
         This process takes all existing CSVs with estate prices, compare to existing rows in database,
@@ -116,20 +115,26 @@ class Runner:
         #? Prepare all CSV with prices to df, and compare to existing DB
         #TODO: based on the file with names of files that are already loaded?
         logger.info(f'Starting processing CSVs to price_history table.')
-        df_new = self.utils.prepare_price_history_csv_to_df()
+        df_new, not_processed_files = self.utils.prepare_price_history_csv_to_df()
         df_new = df_new.drop_duplicates()
         
+        """
         df = self.data_manager.get_all_rows("price_history")
         logger.info(f'Already {len(df)} rows in price_history.')
         
         #? cool way how to find rows which are not part of another df
         df_new = df_new[~df_new.isin(df.to_dict(orient='list')).all(axis=1)]
+        """
         logger.info(f'Prepared {len(df_new)} new rows.')
 
         #? Take prices which are not yet in DB and load them into DB ??
         if len(df_new) > 0:
-            self.data_manager.insert_new_price(df_new)
-            logger.info(f'Inserting into price_history DONE.')
+            try:
+                self.data_manager.insert_new_price(df_new)
+                logger.info(f'Inserting into price_history DONE.')
+                self.utils.write_processed_prices(not_processed_files)
+            except Exception as e:
+                logger.error(f'Inserting into price_history failed: {e}')
         else:
             logger.info(f'No need to insert into price_history. DONE.')
     
