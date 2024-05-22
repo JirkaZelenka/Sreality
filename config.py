@@ -72,7 +72,7 @@ class Config:
                             "26": "sklad", #
                             "27": "výrobni-prostor",  # "výrobní hala"
                             "28": "obchodní-prostor",  #
-                            "29": "ubytovací zařízení", #
+                            "29": "ubytování", # "ubytovací zařízení"
                             "30": "restaurace", #
                             "31": "zemědělský", # "zemědělský objekt"
                             "32": "komercni", # "komerční nemovitost"
@@ -134,6 +134,8 @@ class Config:
                     balcony INTEGER NOT NULL,
                     loggia INTEGER NOT NULL,
                     basin INTEGER NOT NULL,
+                    elevator INTEGER NOT NULL,
+                    estate_area INTEGER NOT NULL,
                     cellar INTEGER NOT NULL,
                     building_type INTEGER NOT NULL,
                     object_kind INTEGER NOT NULL,

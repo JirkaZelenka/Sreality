@@ -188,6 +188,8 @@ class DataManager:
                     str(r['balcony']),
                     str(r['loggia']),
                     str(r['basin']),
+                    str(r['elevator']),
+                    str(r['estate_area']),
                     str(r['cellar']),
                     str(r['building_type']),
                     str(r['object_kind']),
@@ -222,7 +224,7 @@ class DataManager:
                     object_type, parking_lots, locality_street_id, locality_district_id,
                     locality_ward_id, locality_region_id, locality_quarter_id,
                     locality_municipality_id, locality_country_id, terrace, balcony,
-                    loggia, basin, cellar, building_type, object_kind,
+                    loggia, basin, elevator, estate_area, cellar, building_type, object_kind,
                     ownership, low_energy, easy_access, building_condition, garage,
                     room_count_cb, energy_efficiency_rating_cb, note_about_price,
                     id_of_order, last_update, material, age_of_building,
@@ -234,7 +236,7 @@ class DataManager:
                             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
                             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
                             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
-                            ?, ?, ?)
+                            ?, ?, ?, ?, ?)
                     """             
             cursor.executemany(query, data_to_upload)
             conn.commit()

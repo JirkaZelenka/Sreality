@@ -156,6 +156,8 @@ class SrealityScraper:
                 d["balcony"] = int(r.get("recommendations_data").get("balcony"))  
                 d["loggia"] = int(r.get("recommendations_data").get("loggia"))  
                 d["basin"] = int(r.get("recommendations_data").get("basin"))  
+                d["elevator"] = int(r.get("recommendations_data").get("elevator"))
+                d["estate_area"] = int(r.get("recommendations_data").get("estate_area"))    
                 d["cellar"] = int(r.get("recommendations_data").get("cellar"))   
                 d["building_type"] = int(r.get("recommendations_data").get("building_type"))  
                 d["object_kind"] = int(r.get("recommendations_data").get("object_kind"))   
