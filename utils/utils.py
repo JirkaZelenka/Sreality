@@ -39,19 +39,19 @@ class Utilities:
         if code_category_main_cb is not None and not pd.isna(code_category_main_cb):
             return self.cf.type_of_building[str(int(code_category_main_cb))]
         else:
-            return None
+            return "x"
     
     def translate_type_of_deal(self, code_category_type_cb):
         if code_category_type_cb is not None and not pd.isna(code_category_type_cb):
             return self.cf.type_of_deal[str(int(code_category_type_cb))]
         else:
-            return None
+            return "x"
     
     def translate_type_of_rooms(self, code_category_sub_cb):
         if code_category_sub_cb is not None and not pd.isna(code_category_sub_cb):
             return self.cf.type_of_rooms[str(int(code_category_sub_cb))]
         else:
-            return None
+            return "x"
     
     def compare_codes_to_existing_jsons(self, codes_not_found: list[str]) -> list[str]:
         """
@@ -76,7 +76,6 @@ class Utilities:
     def save_progress_json(self, files_with_code, date_to_save):
         file_path = f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.estate_details_folder}/{date_to_save}.json"
 
-        # Save to JSON
         with open(file_path, 'w') as f:
             json.dump(files_with_code, f, indent=4)  
     
@@ -124,8 +123,8 @@ class Utilities:
         final_df.rename(columns={"code": "estate_id"})
         
         #? detail/pronajem/byt/2+1/bilina-teplicke-predmesti-sidliste-shd/3980883276  
-        final_df['category_main_cb_translated'] = final_df['category_main_cb'].apply(self.translate_type_of_building).apply(self.translate_unicode)
         final_df['category_type_cb_translated'] = final_df['category_type_cb'].apply(self.translate_type_of_deal).apply(self.translate_unicode)
+        final_df['category_main_cb_translated'] = final_df['category_main_cb'].apply(self.translate_type_of_building).apply(self.translate_unicode)
         final_df['category_sub_cb_translated'] = final_df['category_sub_cb'].apply(self.translate_type_of_rooms).apply(self.translate_unicode)
         final_df["locality_url"] = final_df["locality_url"].astype(str).apply(self.remove_trailing_dash)
     
@@ -191,7 +190,7 @@ class Utilities:
     
     #TODO: má to být self? nebo static?
     def translate_unicode(self,text: str) -> str:
-        if text is None: return " "
+        if text is None: return "x"
         else: return unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8')
 
     def remove_trailing_dash(self, text: str) -> str:
