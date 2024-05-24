@@ -113,7 +113,7 @@ class Utilities:
         final_df = pd.concat(dfs, ignore_index=True, sort=False)
         
         for c in ["note_about_price", "id_of_order", "last_update", "material",
-                  "age_of_building", "ownership_type", "floor", "usable_area",
+                  "age_of_building", "ownership_type", "floor", "usable_area", "elevator", "estate_area",
                   "floor_area", "energy_efficiency_rating", "no_barriers", "start_of_offer",
                   "locality_url" #? unfortunately unavailable for old scraped data, but necessary
                   ]:
@@ -137,6 +137,7 @@ class Utilities:
                                 final_df["estate_id"].astype(str)
         
         final_df.fillna("-", inplace=True)
+        final_df = final_df.drop_duplicates()
         
         return final_df
     
@@ -145,6 +146,7 @@ class Utilities:
         This loads all file names in price_history folder and compares them with
         the list of file names in price_history_loaded.txt 
         """
+        #TODO: put the .txt name into config here and in write()
         list_of_loaded_files = f"{self.cf.project_path}/{self.cf.data_folder}/price_history_loaded.txt"
         folder_with_csv_files= f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.scraped_prices_folder}"
         files = os.listdir(folder_with_csv_files)
@@ -177,7 +179,7 @@ class Utilities:
 
         return df, not_processed_files
     
-    def write_processed_prices(self, not_processed_files):
+    def _write_processed_prices(self, not_processed_files):
         
         list_of_loaded_files = f"{self.cf.project_path}/{self.cf.data_folder}/price_history_loaded.txt"
         
@@ -186,7 +188,6 @@ class Utilities:
                 file.write(non_processed + '\n')
         
         logger.info(f'Newly processed price files were listed.')
-    
     
     #TODO: má to být self? nebo static?
     def translate_unicode(self,text: str) -> str:

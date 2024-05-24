@@ -67,6 +67,7 @@ class Runner:
 
                 # ? this handles the case when empty JSON would be created and not read by GeoData
                 if len(df_missing) > 0:
+                    #TODO: z fce vyndat saving, abych ji mohl použít samostaně na dodatkový scrpaing + update jsonu
                     self.scraper._scrape_specific_estates(df_missing, full_datetime)
                     logger.info(f'Finished scraping missing estate details for {combination}.')        
                 else:
@@ -105,45 +106,42 @@ class Runner:
         else:
             logger.info(f'No need to insert into estate_detail. DONE.')
 
-    #TODO: pracovat pouze s NOVÝMI, nebo jinak označenými JSONy. Nikoliv merge all a pak porovnej?
     def input_all_prices_to_db(self):
         """
-        This process takes all existing CSVs with estate prices, compare to existing rows in database,
+        This process takes all existing CSVs with estate prices, 
+        compares the names to those in the price_history_loaded.txt,
         and preprocess and insert the new ones into price_history table.
         """
         
-        #? Prepare all CSV with prices to df, and compare to existing DB
-        #TODO: based on the file with names of files that are already loaded?
         logger.info(f'Starting processing CSVs to price_history table.')
         df_new, not_processed_files = self.utils.prepare_price_history_csv_to_df()
         df_new = df_new.drop_duplicates()
+        logger.info(f'Prepared {len(df_new)} new rows.')
         
         """
         df = self.data_manager.get_all_rows("price_history")
         logger.info(f'Already {len(df)} rows in price_history.')
-        
         #? cool way how to find rows which are not part of another df
         df_new = df_new[~df_new.isin(df.to_dict(orient='list')).all(axis=1)]
         """
-        logger.info(f'Prepared {len(df_new)} new rows.')
 
         #? Take prices which are not yet in DB and load them into DB ??
         if len(df_new) > 0:
             try:
                 self.data_manager.insert_new_price(df_new)
                 logger.info(f'Inserting into price_history DONE.')
-                self.utils.write_processed_prices(not_processed_files)
+                self.utils._write_processed_prices(not_processed_files)
             except Exception as e:
                 logger.error(f'Inserting into price_history failed: {e}')
         else:
             logger.info(f'No need to insert into price_history. DONE.')
     
-    #? Combination of scraping, GeoPandas, and Updating DB
     def run_complete_scraping(self,
                               combinations: list["str"]
                               )->pd.DataFrame:
         """
-        This is a combination of Scraping, Follow-up scraping, GeoPandas, and Updating both DB tables with new rows.
+        This is a combination of Scraping, Follow-up scraping, 
+        GeoPandas, and Updating both DB tables with new rows.
         """
         logger.info(f'STARTING complete process of data gathering.')
 
@@ -154,12 +152,26 @@ class Runner:
         self.input_all_estates_to_db()
         self.input_all_prices_to_db()
         
-        result = self.diag.summary_new_estates()
-        self.mailing.send_email(subject=f'SCRAPING SREALITY SUMMARY for {result["Last Date"]}',
-                                message_text=json.dumps(result))
+        discounts_all = self.diag.discounts_in_last_batch(filters=None)
+        self.mailing.send_email(subject=f'SREALITY - DISCOUNTS {discounts_all["Last Date"]}',
+                                message_text=json.dumps(discounts_all))
         
+        discounts_targeted = self.diag.discounts_in_last_batch()
+        self.mailing.send_email(subject=f'SREALITY - DISCOUNTS Prodej-Byty-Praha,Středočeský {discounts_targeted["Last Date"]}',
+                                message_text=json.dumps(discounts_targeted))
         
         logger.info(f'FINISHING complete process of data gathering.')
+
+    def update_empty_estates(self):
+        
+        folder_with_estate_details = f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.estate_details_folder}"
+        files = os.listdir(folder_with_estate_details)
+        
+        for file in files:
+            with open(file, 'r') as file:
+                data = json.load(file)
+                # TODO: pro každý item ve file se porskenuje a spuší na LISTU IDs updating
+            
 
     def diagnostics_after_run(self):
         raise NotImplementedError

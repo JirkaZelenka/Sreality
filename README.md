@@ -9,14 +9,14 @@
 - db_managment: ..
 
 ### Good to know about Sreality:
-- there is no official documentation for the API
-- I used two main sources:
+1) There is no official documentation for the API. Instead I used two main sources:
     - https://dspace.cvut.cz/bitstream/handle/10467/103384/F8-BP-2021-Malach-Ondrej-thesis.pdf
     - https://dspace.cvut.cz/bitstream/handle/10467/111141/F8-DP-2023-Drska-Vojtech-thesis.pdf
 
-- header is necessary for requests, e.g. {"User-Agent": "Mozilla/5.0"} If there is None, data is stil provided by request, BUT the data is RANDOMIZED (prices, size, GPS) eventhough it might still looks valid !!!
-- limitation to display estates per page = 999 - enough to get unique id + price, but not all the details, so the second API is needed for details.
-- limitation to list estates is 60k, meaning one can get data from url ending with "&per_page=999&page=60", but not "&per_page=999&page=61", neither "&per_page=500&page=121" etc.
+2) Header is necessary for requests, e.g. {"User-Agent": "Mozilla/5.0"} If you do not use any, data is stil provided by request, BUT it is RANDOMIZED (prices, size of area, GPS) eventhough it might still looks valid, it is probably made up!
+3) There is a limitation to number of displayed estates per page = 999 (using "&per_page=999") - enough to get unique id + price, but not all the details, so the second API is needed to obtain details.
+4) There is a limitation to display estates in general - 60k, meaning one can get data from url ending with "&per_page=999&page=60", but not "&per_page=999&page=61", neither "&per_page=500&page=121" etc. Therefore it is a good practice to focus on categories one by one, instead of the general request, as there are currently around 95k offers to scrape.
+5) There is a way how to redirect to the full url using 'estate_id' a.k.a. 'hash_id'. Full address looks like: https://www.sreality.cz/detail/prodej/komercni/ubytovani/karlstejn-karlstejn-/937702732 but you can be redirected to this one using simplified url: https://www.sreality.cz/detail/x/x/x/x/937702732 where 'x' can be replaced by any value, ID and the structure is what matters.
 
 |       | A    | B    |
 |-------------|---  -|------|
@@ -53,3 +53,4 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 * 10.5. separating scrapers per category to avoid limit of 60k offers
 * 15-17.5. started using FastAPI, main.py + main.html
 * 19.5. main page formatting statistics + refreshing options 
+* 22.5. hacked redirecting or URL - estate_id is all we need

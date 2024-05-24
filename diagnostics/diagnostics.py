@@ -30,13 +30,20 @@ class Diagnostics:
     
         return estate_stats
     
-    def summary_new_estates(self) -> dict:
+    def discounts_in_last_batch(self,
+                                   filters={
+                                   "category_type_cb": ["1"], # prodej
+                                   "category_main_cb": ["1", "2"], # byt, dům
+                                   "region": ["Hlavní město Praha", "Praha", "Střední Čechy"]
+                                   }) -> dict:
         
         logger.info(f'Preparing summary of the last batch.')
 
         result = {}
         df = self.data_manager.get_all_rows("estate_detail")
         
+        #TODO: není to principiálně špatně? koukám na nejnovější dva datumy u ÚPLNĚ NOVÝCH budov.
+        #todo já chci dvoje nejnovější pozorování cen. to že se to skoro vždy potká není úplně safe enough.
         timestamps = df["crawled_at"].unique()
         timestamp1 = max(timestamps) # the newest timestamp
         timestamp2 = max([x for x in timestamps if x != timestamp1])
@@ -44,6 +51,11 @@ class Diagnostics:
         
         result["New estates observed"] = len(df[df['crawled_at'] == timestamp1])
         
+        if filters:
+            logger.info(f'Applying filters of interest on Discount summary - estates')
+            df = self.filter_of_interest(df, filters)
+            if len(df) == 0: return result
+                    
         #? df1 je poslední timestamp, df2 je předposlední timestamp
         df1 = self.data_manager.get_all_rows_from_date("price_history", timestamp1)
         df2 = self.data_manager.get_all_rows_from_date("price_history", timestamp2)
@@ -77,8 +89,17 @@ class Diagnostics:
         estate["estate_url_combined"] = estate["price_growth_perc"].astype(str) + "% = " + estate["estate_url"].astype(str)
         result["url"] = estate["estate_url_combined"].to_list()
         
-        return result
+        return result         
+    
+    def filter_of_interest(self, df, filters) -> pd.DataFrame:
+        for key, value in filters.items():
+            try:
+                df = df[df[key].isin(value)]
+            except Exception as e:
+                logger.error(f'Filtering failed on {key}:{value} as {e}')
                 
+        return df               
+    
     def compare_new_prices(self) -> pd.DataFrame:
         raise NotImplementedError
     

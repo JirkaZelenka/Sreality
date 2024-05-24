@@ -75,7 +75,7 @@ class Config:
                             "29": "ubytování", # "ubytovací zařízení"
                             "30": "restaurace", #
                             "31": "zemědělský", # "zemědělský objekt"
-                            "32": "komercni", # "komerční nemovitost"
+                            "32": "komerční", # "komerční nemovitost"
                             "33": "chata",
                             "34": "garáž", #
                             "35": "památka", #
