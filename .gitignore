@@ -18,3 +18,4 @@ all_data.db
 price_history_loaded.txt
 # Logs
 scraping.log
+app.log

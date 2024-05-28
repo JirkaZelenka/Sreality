@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 from config import Config
 from db_managment.data_manager import DataManager
-from utils.logger import logger
+from utils.logger import logger_scraping
 
 class Diagnostics:
     
@@ -22,22 +22,18 @@ class Diagnostics:
         
         price_stats = self.data_manager.get_count_prices()
         price_history_row_count = price_stats["all_rows"].values[0]
-        
         estate_stats["price history rows"] = price_history_row_count
-        
-        logger.info(f'Number of unique rows in estate_detail table: {unique_estates}')
-        logger.info(f'Number of rows in price_history table: {price_history_row_count}')
-    
+            
         return estate_stats
     
     def discounts_in_last_batch(self,
-                                   filters={
-                                   "category_type_cb": ["1"], # prodej
-                                   "category_main_cb": ["1", "2"], # byt, dům
-                                   "region": ["Hlavní město Praha", "Praha", "Střední Čechy"]
-                                   }) -> dict:
+                                filters={
+                                "category_type_cb": [1], # prodej
+                                "category_main_cb": [1, 2], # byt, dům
+                                "region": ["Hlavní město Praha", "Praha", "Střední Čechy"]
+                                }) -> dict:
         
-        logger.info(f'Preparing summary of the last batch.')
+        logger_scraping.info(f'Preparing summary of the last batch.')
 
         result = {}
         df = self.data_manager.get_all_rows("estate_detail")
@@ -52,7 +48,7 @@ class Diagnostics:
         result["New estates observed"] = len(df[df['crawled_at'] == timestamp1])
         
         if filters:
-            logger.info(f'Applying filters of interest on Discount summary - estates')
+            logger_scraping.info(f'Applying filters of interest on Discount summary - estates')
             df = self.filter_of_interest(df, filters)
             if len(df) == 0: return result
                     
@@ -66,7 +62,8 @@ class Diagnostics:
         #TODO: check jestli tyto jsou doplněk k New a lost nějak.
         merged_df = df1.merge(df2, on='estate_id', suffixes=('_df1', '_df2'), how='inner')
         
-        # Adding URL from estate_detail. 
+        # Adding URL from estate_detail, df = all rows
+        # #TODO: šlo by to tady zoptimalizovat? možná nemerogvat celý df ale jen jeho 2-3 sloupce? 
         merged_df = merged_df.merge(df, on="estate_id", how="left")
         
         merged_df = merged_df[["estate_id", "price_df1", "price_df2", "estate_url"]]
@@ -83,8 +80,7 @@ class Diagnostics:
         result["Estates that are more expensive"] = int(estates_higher_price['estate_id'].count())
         result["Estates that are cheaper"] = int(estates_lower_price['estate_id'].count())
         
-        #TODO: sort by price_growth_perc from lowest (negative growth = discount), add URLs
-        
+        #? sort by price_growth_perc from lowest (negative growth = discount), add URLs
         estate = estates_lower_price[["price_growth_perc", "estate_url"]].sort_values(by="price_growth_perc", ascending=True)
         estate["estate_url_combined"] = estate["price_growth_perc"].astype(str) + "% = " + estate["estate_url"].astype(str)
         result["url"] = estate["estate_url_combined"].to_list()
@@ -96,7 +92,7 @@ class Diagnostics:
             try:
                 df = df[df[key].isin(value)]
             except Exception as e:
-                logger.error(f'Filtering failed on {key}:{value} as {e}')
+                logger_scraping.error(f'Filtering failed on {key}:{value} as {e}')
                 
         return df               
     

@@ -5,7 +5,7 @@ from typing import Optional
 
 from config import Config
 from utils.utils import Utilities
-from utils.logger import logger
+from utils.logger import logger_scraping
 
 class SrealityScraper:
     
@@ -30,14 +30,14 @@ class SrealityScraper:
             response = requests.get(urls_to_count[url])
             result[url] = response.json()["result_size"]
 
-        #logger.info(f'There are {result["all"]} Estates in total')
-        #logger.info(f'There are {result["prodej_byty"]} prodej_byty')
-        #logger.info(f'There are {result["prodej_domy"]} prodej_domy')
-        #logger.info(f'There are {result["prodej_pozemky"]} prodej_pozemky')
-        #logger.info(f'There are {result["prodej_komercni"]} prodej_komercni')
-        #logger.info(f'There are {result["prodej_ostatni"]} prodej_ostatni')
-        #logger.info(f'There are {result["pronajem_byty"]} pronajem_byty')
-        #logger.info(f'There are {result["pronajem_domy"]} pronajem_domy')
+        #logger_scraping.info(f'There are {result["all"]} Estates in total')
+        #logger_scraping.info(f'There are {result["prodej_byty"]} prodej_byty')
+        #logger_scraping.info(f'There are {result["prodej_domy"]} prodej_domy')
+        #logger_scraping.info(f'There are {result["prodej_pozemky"]} prodej_pozemky')
+        #logger_scraping.info(f'There are {result["prodej_komercni"]} prodej_komercni')
+        #logger_scraping.info(f'There are {result["prodej_ostatni"]} prodej_ostatni')
+        #logger_scraping.info(f'There are {result["pronajem_byty"]} pronajem_byty')
+        #logger_scraping.info(f'There are {result["pronajem_domy"]} pronajem_domy')
         
         return result
     
@@ -57,7 +57,7 @@ class SrealityScraper:
         
         result = {}
         for combo in combinations:
-            logger.info(f'Running scraper for {combo}')
+            logger_scraping.info(f'Running scraper for {combo}')
             
             num_pages = (counts[f"{combo}"]//per_page) + 1
             
@@ -117,7 +117,6 @@ class SrealityScraper:
     
         data = []
         save_counter = 0
-        print("SCRAPING Estate details.")
         for estate_id in tqdm(estate_ids):
             
             if save_counter == 500:

@@ -11,7 +11,7 @@ from utils.geodata import GeoData
 from utils.mailing import EmailService
 from config import Config
 
-from utils.logger import logger
+from utils.logger import logger_scraping
 
 class Runner:
     
@@ -34,10 +34,9 @@ class Runner:
         3.) For new estate_details files, there are GeoData obtained and saved
         """
         full_datetime, date_to_save = self.utils.generate_timestamp()
-        logger.info(f'Starting scraping process.')
         
         data_dict = self.scraper.scrape_multiple_sections(combinations, full_datetime)
-        logger.info(f'Data scraped for all combinations.')
+        logger_scraping.info(f'Data scraped for all combinations.')
         
         #TODO: missing codes. co nesesbírám hned poté, tak můůžu později, ale jen okud na něj narazím znovu na ten objekt
         for combination in combinations:
@@ -47,7 +46,7 @@ class Runner:
                 self.utils.safe_save_csv(df_data, 
                                          f"data_{combination}_{date_to_save}")
             except Exception as e:
-                logger.error(f'There is no key {combination} in returned data: {e}')   
+                logger_scraping.error(f'There is no key {combination} in returned data: {e}')   
         
         #TODO: částečná duplikace postupu, ale..asi ok
         for combination in combinations:
@@ -63,24 +62,24 @@ class Runner:
                 
                 # ? check existing codes in JSON - might be not processed previously
                 df_missing = self.utils.compare_codes_to_existing_jsons(df_missing)
-                logger.info(f'There are {len(df_missing)} new codes to scrape for {combination}.')
+                logger_scraping.info(f'There are {len(df_missing)} new codes to scrape for {combination}.')
 
                 # ? this handles the case when empty JSON would be created and not read by GeoData
                 if len(df_missing) > 0:
                     #TODO: z fce vyndat saving, abych ji mohl použít samostaně na dodatkový scrpaing + update jsonu
                     self.scraper._scrape_specific_estates(df_missing, full_datetime)
-                    logger.info(f'Finished scraping missing estate details for {combination}.')        
+                    #logger_scraping.info(f'Finished scraping missing estate details for {combination}.')        
                 else:
-                    logger.info(f'No need to scrape missing estate details for {combination}.')             
+                    logger_scraping.info(f'No need to scrape missing estate details for {combination}.')             
             except Exception as e:
-                logger.error(f'Some error occured during scraping estate_details for {combination}: {e}')  
+                logger_scraping.error(f'Some error occured during scraping estate_details for {combination}: {e}')  
 
     #TODO: tím že je to odělené od scrapingu, je nutné to mít jako samostatný run, nebo nechat jako util?
     def update_geodata(self, list_of_jsons=None):
         #? Get Geodata for all JSON files that do not have any, usually for new estate_detail scraped.
-        logger.info(f'Updating GeoData')
+        logger_scraping.info(f'Updating GeoData')
         self.geodata.enrich_jsons_with_geodata(list_of_jsons=list_of_jsons)
-        logger.info(f'Updating GeoData Done')
+        logger_scraping.info(f'Updating GeoData Done')
         
     def input_all_estates_to_db(self):
         """
@@ -89,22 +88,22 @@ class Runner:
         """
         
         #? First prepare all existing JSONs to df, and compare to existing DB
-        logger.info(f'Starting processing JSONs to estate_detail table.')
+        logger_scraping.info(f'Starting processing JSONs to estate_detail table.')
         df_new = self.utils.prepare_estate_detail_jsons_to_df()
         
         df = self.data_manager.get_all_rows("estate_detail")
-        logger.info(f'Already {len(df)} rows in estate_detail.')
+        logger_scraping.info(f'Already {len(df)} rows in estate_detail.')
         
         existing_codes = df["estate_id"].unique() if len(df) > 0 else []
         df_new = df_new[~df_new["estate_id"].isin(existing_codes)]
-        logger.info(f'Prepared {len(df_new)} new rows.')
+        logger_scraping.info(f'Prepared {len(df_new)} new rows.')
                 
         #? Take offers which codes are not yet in DB and load them into DB
         if len(df_new) > 0:
             self.data_manager.insert_new_estates(df_new)
-            logger.info(f'Insert into estate_detail DONE.')
+            #logger_scraping.info(f'Insert into estate_detail DONE.')
         else:
-            logger.info(f'No need to insert into estate_detail. DONE.')
+            logger_scraping.info(f'No need to insert into estate_detail. DONE.')
 
     def input_all_prices_to_db(self):
         """
@@ -113,14 +112,14 @@ class Runner:
         and preprocess and insert the new ones into price_history table.
         """
         
-        logger.info(f'Starting processing CSVs to price_history table.')
+        logger_scraping.info(f'Starting processing CSVs to price_history table.')
         df_new, not_processed_files = self.utils.prepare_price_history_csv_to_df()
         df_new = df_new.drop_duplicates()
-        logger.info(f'Prepared {len(df_new)} new rows.')
+        logger_scraping.info(f'Prepared {len(df_new)} new rows.')
         
         """
         df = self.data_manager.get_all_rows("price_history")
-        logger.info(f'Already {len(df)} rows in price_history.')
+        logger_scraping.info(f'Already {len(df)} rows in price_history.')
         #? cool way how to find rows which are not part of another df
         df_new = df_new[~df_new.isin(df.to_dict(orient='list')).all(axis=1)]
         """
@@ -129,12 +128,12 @@ class Runner:
         if len(df_new) > 0:
             try:
                 self.data_manager.insert_new_price(df_new)
-                logger.info(f'Inserting into price_history DONE.')
+                #logger_scraping.info(f'Inserting into price_history DONE.')
                 self.utils._write_processed_prices(not_processed_files)
             except Exception as e:
-                logger.error(f'Inserting into price_history failed: {e}')
+                logger_scraping.error(f'Inserting into price_history failed: {e}')
         else:
-            logger.info(f'No need to insert into price_history. DONE.')
+            logger_scraping.info(f'No need to insert into price_history. DONE.')
     
     def run_complete_scraping(self,
                               combinations: list["str"]
@@ -143,7 +142,7 @@ class Runner:
         This is a combination of Scraping, Follow-up scraping, 
         GeoPandas, and Updating both DB tables with new rows.
         """
-        logger.info(f'STARTING complete process of data gathering.')
+        logger_scraping.info(f'STARTING complete process of data gathering.')
 
         self.scrape_prices_and_details(combinations)
         
@@ -160,7 +159,7 @@ class Runner:
         self.mailing.send_email(subject=f'SREALITY - DISCOUNTS Prodej-Byty-Praha,Středočeský {discounts_targeted["Last Date"]}',
                                 message_text=json.dumps(discounts_targeted))
         
-        logger.info(f'FINISHING complete process of data gathering.')
+        logger_scraping.info(f'FINISHING complete process of data gathering.')
 
     def update_empty_estates(self):
         

@@ -7,7 +7,7 @@ import unicodedata
 
 from config import Config
 
-from utils.logger import logger
+from utils.logger import logger_scraping
 
 class Utilities:
     
@@ -27,7 +27,7 @@ class Utilities:
         file_path = f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.scraped_prices_folder}/{filename}.csv" 
         
         if os.path.exists(file_path):
-            logger.info(f'Name {filename} in {file_path} already exists. Saving as {filename}_SAFE')
+            logger_scraping.info(f'Name {filename} in {file_path} already exists. Saving as {filename}_SAFE')
             filename += "_SAFE"
             file_path = f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.scraped_prices_folder}/{filename}.csv" 
             df.to_csv(file_path, sep=";", encoding="utf-8", index=False)
@@ -159,7 +159,7 @@ class Utilities:
                 print(f"there are already {len(processed_files)} processed files")   
                 
         not_processed_files = [x for x in files if x not in processed_files]
-        logger.info(f'Processing {len(not_processed_files)} non-processed files with prices for DB.')
+        logger_scraping.info(f'Processing {len(not_processed_files)} non-processed files with prices for DB.')
              
         dfs = []
         for file_name in tqdm(not_processed_files):
@@ -171,7 +171,7 @@ class Utilities:
                     
                 dfs.append(data)
             except:
-                logger.error(f'There was an error in file {file_name}')
+                logger_scraping.error(f'There was an error in file {file_name}')
                 continue
         
         df = pd.concat(dfs, ignore_index=True)
@@ -187,7 +187,7 @@ class Utilities:
             with open(list_of_loaded_files, 'a') as file:
                 file.write(non_processed + '\n')
         
-        logger.info(f'Newly processed price files were listed.')
+        logger_scraping.info(f'Newly processed price files were listed.')
     
     #TODO: má to být self? nebo static?
     def translate_unicode(self,text: str) -> str:

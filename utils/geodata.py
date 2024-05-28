@@ -5,8 +5,6 @@ from tqdm import tqdm
 
 from config import Config
 
-from utils.logger import logger
-
 from geopy.geocoders import Nominatim   # Geolocator   # pip install geopy  
 from geopy.exc import GeocoderTimedOut  # for Error handling
 

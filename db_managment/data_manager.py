@@ -4,7 +4,7 @@ import sqlite3
 
 from config import Config 
 
-from utils.logger import logger
+from utils.logger import logger_scraping
 
 class DataManager:
     """
@@ -22,7 +22,7 @@ class DataManager:
             conn = sqlite3.connect(f"{self.cf.project_path}/{self.cf.db_name}")
             return conn
         except sqlite3.Error as e:
-            logger.error(f'Error connecting to database: {e}') 
+            logger_scraping.error(f'Error connecting to database: {e}') 
 
             return None
 
@@ -49,7 +49,7 @@ class DataManager:
             return df
         
         except sqlite3.Error as e:
-            logger.error(f'Error loading rows from table {table_name}: {e}') 
+            logger_scraping.error(f'Error loading rows from table {table_name}: {e}') 
             conn.rollback()
         
         conn.close()
@@ -69,7 +69,7 @@ class DataManager:
             return df
         
         except sqlite3.Error as e:
-            logger.error(f'Error loading rows from table {table_name}: {e}') 
+            logger_scraping.error(f'Error loading rows from table {table_name}: {e}') 
             conn.rollback()
         
         conn.close()
@@ -84,7 +84,7 @@ class DataManager:
             return df
         
         except sqlite3.Error as e:
-            logger.error(f'Error loading rows from table {table_name}: {e}') 
+            logger_scraping.error(f'Error loading rows from table {table_name}: {e}') 
             conn.rollback()
         
         conn.close()
@@ -99,7 +99,7 @@ class DataManager:
             return df
         
         except sqlite3.Error as e:
-            logger.error(f'Error loading rows from table {table_name} for timestamp {timestamp}: {e}') 
+            logger_scraping.error(f'Error loading rows from table {table_name} for timestamp {timestamp}: {e}') 
             conn.rollback()
         
         conn.close()
@@ -113,7 +113,7 @@ class DataManager:
             conn.commit()
             cursor.close()
         except sqlite3.Error as e:
-            logger.error(f'Error clearing table {table_name}: {e}') 
+            logger_scraping.error(f'Error clearing table {table_name}: {e}') 
             conn.rollback()
         
         conn.close()
@@ -127,7 +127,7 @@ class DataManager:
             conn.commit()
             cursor.close()
         except sqlite3.Error as e:
-            logger.error(f'Error dropping table {table_name}: {e}') 
+            logger_scraping.error(f'Error dropping table {table_name}: {e}') 
             conn.rollback()
         
         conn.close()
@@ -143,7 +143,7 @@ class DataManager:
             conn.commit()
             cursor.close()
         except sqlite3.Error as e:
-            logger.error(f'Error creating table {table_name}: {e}') 
+            logger_scraping.error(f'Error creating table {table_name}: {e}') 
             conn.rollback()
         
         conn.close()
@@ -242,7 +242,7 @@ class DataManager:
             conn.commit()
 
         except sqlite3.Error as e:
-            logger.error(f'Error inserting offer: {e}')        
+            logger_scraping.error(f'Error inserting offer: {e}')        
             conn.rollback()
             
         conn.close()
@@ -274,7 +274,7 @@ class DataManager:
             conn.commit()
 
         except sqlite3.Error as e:
-            logger.error(f'Error updating offer: {e}')        
+            logger_scraping.error(f'Error updating offer: {e}')        
             conn.rollback()
             
         conn.close()
@@ -304,7 +304,7 @@ class DataManager:
             conn.commit()
 
         except sqlite3.Error as e:
-            logger.error(f'Error inserting offer: {e}')        
+            logger_scraping.error(f'Error inserting offer: {e}')        
             conn.rollback()
             
         conn.close()
