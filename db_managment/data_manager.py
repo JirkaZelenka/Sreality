@@ -88,6 +88,21 @@ class DataManager:
             conn.rollback()
         
         conn.close()
+    
+    def get_price_rows_for_test(self, number):
+        
+        conn = self._get_connection()        
+        try:
+            query = f"SELECT distinct estate_id, crawled_at FROM price_history limit {number}"
+            df = pd.read_sql_query(query, conn)
+            conn.close()
+            return df
+        
+        except sqlite3.Error as e:
+            logger_scraping.error(f'Error loading rows from table price_history for test: {e}') 
+            conn.rollback()
+        
+        conn.close()
         
     def get_all_rows_from_date(self, table_name, timestamp):
         
