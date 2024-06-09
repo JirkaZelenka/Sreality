@@ -143,14 +143,26 @@
 
     <script>
         function updateTable(tableId, data) {
-            let table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
-            table.innerHTML = '';
-            for (let key in data) {
-                let row = table.insertRow();
-                let cell1 = row.insertCell(0);
-                let cell2 = row.insertCell(1);
-                cell1.innerHTML = key + ':';
-                cell2.innerHTML = data[key];
+            const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+            table.innerHTML = ''; // Clear existing table content
+        
+            for (const key in data) {
+                if (typeof data[key] === 'object' && data[key] !== null) {
+                    const row = table.insertRow();
+                    const cellKey = row.insertCell(0);
+                    const cellValue1 = row.insertCell(1);
+                    const cellValue2 = row.insertCell(2);
+        
+                    cellKey.textContent = key + ':';
+                    cellValue1.textContent = data[key].total || 'N/A';
+                    cellValue2.textContent = `Praha: ${data[key].praha || 'N/A'}, Středočeský: ${data[key].stredocesky || 'N/A'}`;
+                } else {
+                    const row = table.insertRow();
+                    const cellKey = row.insertCell(0);
+                    const cellValue = row.insertCell(1);
+                    cellKey.textContent = key + ':';
+                    cellValue.textContent = data[key];
+                }
             }
         }
 

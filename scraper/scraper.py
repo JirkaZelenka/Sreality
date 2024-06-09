@@ -14,31 +14,38 @@ class SrealityScraper:
         self.config = Config()
         
     def get_counts_of_categories(self) -> dict:
-        
+        #TODO: nepřesunout toto do diagnostics? mám tam i describe DB
         result = {}
+        url_base_count = "https://www.sreality.cz/api/cs/v2/estates/count"  
+        url_prodej, url_pronajem = "1", "2"
         urls_to_count = {
-        "all"              : "https://www.sreality.cz/api/cs/v2/estates/count" 
-        ,"prodej_byty"     : "https://www.sreality.cz/api/cs/v2/estates/count?category_type_cb=1&category_main_cb=1"
-        ,"prodej_domy"     : "https://www.sreality.cz/api/cs/v2/estates/count?category_type_cb=1&category_main_cb=2"
-        ,"prodej_pozemky"  : "https://www.sreality.cz/api/cs/v2/estates/count?category_type_cb=1&category_main_cb=3"
-        ,"prodej_komercni" : "https://www.sreality.cz/api/cs/v2/estates/count?category_type_cb=1&category_main_cb=4"
-        ,"prodej_ostatni"  : "https://www.sreality.cz/api/cs/v2/estates/count?category_type_cb=1&category_main_cb=5"
-        ,"pronajem_byty"   : "https://www.sreality.cz/api/cs/v2/estates/count?category_type_cb=2&category_main_cb=1"
-        ,"pronajem_domy"   : "https://www.sreality.cz/api/cs/v2/estates/count?category_type_cb=2&category_main_cb=2"
+        "all": f"{url_base_count}",
+        "prodej_byty": {
+            "total": f"{url_base_count}?category_type_cb={url_prodej}&category_main_cb=1",
+            "praha": f"{url_base_count}?category_type_cb={url_prodej}&category_main_cb=1&locality_region_id=10",
+            "stredocesky": f"{url_base_count}?category_type_cb={url_prodej}&category_main_cb=1&locality_region_id=11"
+        },
+        "prodej_domy": {
+            "total": f"{url_base_count}?category_type_cb={url_prodej}&category_main_cb=2",
+            "praha": f"{url_base_count}?category_type_cb={url_prodej}&category_main_cb=2&locality_region_id=10",
+            "stredocesky": f"{url_base_count}?category_type_cb={url_prodej}&category_main_cb=2&locality_region_id=11"
+        },
+        "prodej_pozemky": f"{url_base_count}?category_type_cb={url_prodej}&category_main_cb=3",
+        "prodej_komercni": f"{url_base_count}?category_type_cb={url_prodej}&category_main_cb=4",
+        "prodej_ostatni": f"{url_base_count}?category_type_cb={url_prodej}&category_main_cb=5",
+        "pronajem_byty": f"{url_base_count}?category_type_cb={url_pronajem}&category_main_cb=1",
+        "pronajem_domy": f"{url_base_count}?category_type_cb={url_pronajem}&category_main_cb=2"
         }
-        for url in urls_to_count.keys():
-            response = requests.get(urls_to_count[url])
-            result[url] = response.json()["result_size"]
+        for key, value in urls_to_count.items():
+            if isinstance(value, dict):
+                result[key] = {}
+                for sub_key, sub_value in value.items():
+                    response = requests.get(sub_value)
+                    result[key][sub_key] = response.json()["result_size"]
+            else:
+                response = requests.get(value)
+                result[key] = response.json()["result_size"]
 
-        #logger_scraping.info(f'There are {result["all"]} Estates in total')
-        #logger_scraping.info(f'There are {result["prodej_byty"]} prodej_byty')
-        #logger_scraping.info(f'There are {result["prodej_domy"]} prodej_domy')
-        #logger_scraping.info(f'There are {result["prodej_pozemky"]} prodej_pozemky')
-        #logger_scraping.info(f'There are {result["prodej_komercni"]} prodej_komercni')
-        #logger_scraping.info(f'There are {result["prodej_ostatni"]} prodej_ostatni')
-        #logger_scraping.info(f'There are {result["pronajem_byty"]} pronajem_byty')
-        #logger_scraping.info(f'There are {result["pronajem_domy"]} pronajem_domy')
-        
         return result
     
     def scrape_multiple_sections(self, 

@@ -37,6 +37,7 @@ async def show_main(request: Request):
     #? removed to work offline
     #market_stats = runner.scraper.get_counts_of_categories()
     
+    #? logs go automatically to logger.. print goes to console. return can go to the app window.
     return templates.TemplateResponse("main.html", 
                                       {"request": request,
                                        "log_content": log_content,
@@ -53,7 +54,6 @@ def send_mail_with_discounts():
     runner.mailing.send_email(subject=f'SREALITY - DISCOUNTS Prodej-Byty-Praha,Středočeský  {discounts_targeted["Last Date"]}',
                                 message_text=json.dumps(discounts_targeted))
 
-#? logs go automatically to logger.. print goes to console. return can go to the app window.
 @app.get("/get_market_stats/")
 def get_market_stats():
     logger_app.info(f'Obtaining market stats.')
@@ -80,7 +80,6 @@ def get_logs():
         log_lines = file.readlines()
     log_content = ''.join(log_lines[-50:])
     return log_content
-
 
 
 @app.post("/start_scraping/")
