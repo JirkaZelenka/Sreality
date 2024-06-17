@@ -1,14 +1,10 @@
-from datetime import datetime
 import pandas as pd
 from tqdm import tqdm
-import re
-
 import sqlite3
-import os
 
 from config import Config 
 
-from utils.logger import logger
+from utils.logger import logger_scraping
 
 class DataManager:
     """
@@ -26,10 +22,58 @@ class DataManager:
             conn = sqlite3.connect(f"{self.cf.project_path}/{self.cf.db_name}")
             return conn
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error connecting to database: {e}') 
+            logger_scraping.error(f'Error connecting to database: {e}') 
 
             return None
 
+    def get_count_estates(self, table_name="estate_detail"):
+        
+        conn = self._get_connection()        
+        try:
+            f"SELECT * FROM {table_name}"
+            
+            #? these names go to the table in the FastAPI
+            query = f"""SELECT 
+                        COUNT(*) as 'estate count', 
+                        COUNT(DISTINCT estate_id) as 'unique estate count',
+                        MIN(DISTINCT DATE(crawled_at)) as 'first day',
+                        MAX(DISTINCT DATE(crawled_at)) as 'last day',
+                        MAX(DISTINCT crawled_at) as 'last scraping',
+                        COUNT(DISTINCT region) as 'regions count',
+                        COUNT(DISTINCT district) as 'district count',
+                        COUNT(DISTINCT city) as 'city count'
+                    FROM {table_name};"""            
+            
+            df = pd.read_sql_query(query, conn)
+            conn.close()
+            return df
+        
+        except sqlite3.Error as e:
+            logger_scraping.error(f'Error loading rows from table {table_name}: {e}') 
+            conn.rollback()
+        
+        conn.close()
+        
+    def get_count_prices(self, table_name="price_history"):
+        
+        conn = self._get_connection()        
+        try:
+            f"SELECT * FROM {table_name}"
+            
+            query = f"""SELECT 
+                        COUNT(*) as 'all_rows'
+                    FROM {table_name};"""            
+            
+            df = pd.read_sql_query(query, conn)
+            conn.close()
+            return df
+        
+        except sqlite3.Error as e:
+            logger_scraping.error(f'Error loading rows from table {table_name}: {e}') 
+            conn.rollback()
+        
+        conn.close()
+    
     def get_all_rows(self, table_name):
         
         conn = self._get_connection()        
@@ -40,7 +84,37 @@ class DataManager:
             return df
         
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error loading rows from table {table_name}: {e}') 
+            logger_scraping.error(f'Error loading rows from table {table_name}: {e}') 
+            conn.rollback()
+        
+        conn.close()
+    
+    def get_price_rows_for_test(self, number):
+        
+        conn = self._get_connection()        
+        try:
+            query = f"SELECT distinct estate_id, crawled_at FROM price_history limit {number}"
+            df = pd.read_sql_query(query, conn)
+            conn.close()
+            return df
+        
+        except sqlite3.Error as e:
+            logger_scraping.error(f'Error loading rows from table price_history for test: {e}') 
+            conn.rollback()
+        
+        conn.close()
+        
+    def get_all_rows_from_date(self, table_name, timestamp):
+        
+        conn = self._get_connection()        
+        try:
+            query = f"SELECT * FROM {table_name} WHERE crawled_at = '{timestamp}'"
+            df = pd.read_sql_query(query, conn)
+            conn.close()
+            return df
+        
+        except sqlite3.Error as e:
+            logger_scraping.error(f'Error loading rows from table {table_name} for timestamp {timestamp}: {e}') 
             conn.rollback()
         
         conn.close()
@@ -54,7 +128,7 @@ class DataManager:
             conn.commit()
             cursor.close()
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error clearing table {table_name}: {e}') 
+            logger_scraping.error(f'Error clearing table {table_name}: {e}') 
             conn.rollback()
         
         conn.close()
@@ -68,7 +142,7 @@ class DataManager:
             conn.commit()
             cursor.close()
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error dropping table {table_name}: {e}') 
+            logger_scraping.error(f'Error dropping table {table_name}: {e}') 
             conn.rollback()
         
         conn.close()
@@ -84,7 +158,7 @@ class DataManager:
             conn.commit()
             cursor.close()
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error creating table {table_name}: {e}') 
+            logger_scraping.error(f'Error creating table {table_name}: {e}') 
             conn.rollback()
         
         conn.close()
@@ -99,12 +173,14 @@ class DataManager:
             for i in range(len(df)):
                 r = df.iloc[i]
                 data_to_upload.append([
-                    str(r['code']),
+                    str(r['estate_id']),
                     str(r['description']),
                     str(r['meta_description']),
                     str(r['category_main_cb']),
                     str(r['category_type_cb']),
                     str(r['category_sub_cb']),
+                    str(r['locality_url']),
+                    str(r['estate_url']),
                     str(r['broker_id']),
                     str(r['broker_company']),
                     str(r['furnished']),
@@ -127,6 +203,8 @@ class DataManager:
                     str(r['balcony']),
                     str(r['loggia']),
                     str(r['basin']),
+                    str(r['elevator']),
+                    str(r['estate_area']),
                     str(r['cellar']),
                     str(r['building_type']),
                     str(r['object_kind']),
@@ -154,14 +232,14 @@ class DataManager:
 
             query = f"""
                     INSERT INTO estate_detail (
-                    code, description, meta_description,
-                    category_main_cb, category_type_cb, category_sub_cb,
+                    estate_id, description, meta_description,
+                    category_main_cb, category_type_cb, category_sub_cb, locality_url, estate_url,
                     broker_id, broker_company, furnished,
                     latitude, longitude, locality, city, district, region,
                     object_type, parking_lots, locality_street_id, locality_district_id,
                     locality_ward_id, locality_region_id, locality_quarter_id,
                     locality_municipality_id, locality_country_id, terrace, balcony,
-                    loggia, basin, cellar, building_type, object_kind,
+                    loggia, basin, elevator, estate_area, cellar, building_type, object_kind,
                     ownership, low_energy, easy_access, building_condition, garage,
                     room_count_cb, energy_efficiency_rating_cb, note_about_price,
                     id_of_order, last_update, material, age_of_building,
@@ -172,13 +250,14 @@ class DataManager:
                             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
                             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
                             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
+                            ?, ?, ?, ?, ?)
                     """             
             cursor.executemany(query, data_to_upload)
             conn.commit()
 
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error inserting offer: {e}')        
+            logger_scraping.error(f'Error inserting offer: {e}')        
             conn.rollback()
             
         conn.close()
@@ -210,7 +289,7 @@ class DataManager:
             conn.commit()
 
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error updating offer: {e}')        
+            logger_scraping.error(f'Error updating offer: {e}')        
             conn.rollback()
             
         conn.close()
@@ -240,7 +319,7 @@ class DataManager:
             conn.commit()
 
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error inserting offer: {e}')        
+            logger_scraping.error(f'Error inserting offer: {e}')        
             conn.rollback()
             
         conn.close()
