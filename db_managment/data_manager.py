@@ -89,6 +89,7 @@ class DataManager:
         
         conn.close()
     
+    #TODO: delete later? when new structure of prices holds
     def get_price_rows_for_test(self, number):
         
         conn = self._get_connection()        
@@ -294,7 +295,7 @@ class DataManager:
             
         conn.close()
     
-    def insert_new_price(self, df):
+    def insert_new_price_v1(self, df):
         
         conn = self._get_connection()
         try:
@@ -324,7 +325,135 @@ class DataManager:
             
         conn.close()
    
-    
+    def insert_new_price_v2(self, df):
+        
+        conn = self._get_connection()
+        try:
+            cursor = conn.cursor()
+            
+            for i in range(len(df)):
+                r = df.iloc[i]
+                estate_id = str(r['estate_id'])
+                price = str(r["price"])
+                crawled_at = str(r["crawled_at"])
+                
+                # Check the latest price entry for this estate_id
+                cursor.execute("""
+                    SELECT price, start_date, end_date 
+                    FROM price_history_new 
+                    WHERE estate_id = ? 
+                    ORDER BY start_date DESC 
+                    LIMIT 1
+                    """, (estate_id,))
+                
+                latest_entry = cursor.fetchone()
+                
+                if latest_entry:
+                    latest_price, _latest_start_date, latest_end_date = latest_entry
+                    
+                    if latest_price != price:
+                        # Update the end_date of the previous price record
+                        cursor.execute("""
+                            UPDATE price_history_new
+                            SET end_date = ?
+                            WHERE estate_id = ? AND price = ? AND end_date = ?
+                            """, (crawled_at, estate_id, latest_price, latest_end_date))
+                        
+                        # Insert the new price record, START = END
+                        cursor.execute("""
+                            INSERT INTO price_history_new (
+                            estate_id, price, start_date, end_date)
+                            VALUES (?, ?, ?, ?)
+                            """, (estate_id, price, crawled_at, crawled_at))
+                        print(f"This price {price} was New, so we inserted a new recored for {estate_id}: {(estate_id, price, crawled_at, crawled_at)}")
+                    else:
+                        # Update the end_date of the existing price record if the price is the same
+                        cursor.execute("""
+                            UPDATE price_history_new
+                            SET end_date = ?
+                            WHERE estate_id = ? AND price = ? AND end_date = ?
+                            """, (crawled_at, estate_id, price, latest_end_date))
+                        print(f"This price {price} already existed, so we just prolong the date: {crawled_at}")
+                else:
+                    # If No previous record exists, insert the new price record
+                    cursor.execute("""
+                        INSERT INTO price_history_new (
+                        estate_id, price, start_date, end_date)
+                        VALUES (?, ?, ?, ?)
+                        """, (estate_id, price, crawled_at, crawled_at))
+                    print(f"This estate_id {estate_id} is new  {estate_id, price, crawled_at, crawled_at} so we make first row of it: !")
+                          
+            conn.commit()
 
-    
+        except sqlite3.Error as e:
+            logger_scraping.error(f'Error inserting offer: {e}')        
+            conn.rollback()
+            
+        conn.close()
 
+    def transformation_create_dates(self, df):
+        """
+        Group DF by estate_id, order chronologically, and group the consecutive prices, 
+        creating start_date and end_date.
+        """
+        transformed_data = []
+        for estate_id, group in df.groupby('estate_id'):
+            group = group.sort_values(by='crawled_at').reset_index(drop=True)
+            
+            if group.empty:
+                continue
+
+            current_price = group.at[0, 'price']
+            start_date = group.at[0, 'crawled_at']
+            end_date = None
+            
+            for i in range(1, len(group)):
+                next_start_date = group.at[i, 'crawled_at']
+                
+                if group.at[i, 'price'] == current_price:
+                    end_date = next_start_date
+                else:
+                    transformed_data.append([estate_id, current_price, start_date, next_start_date])
+                    current_price = group.at[i, 'price']
+                    start_date = next_start_date
+                    end_date = None
+
+            transformed_data.append([estate_id, current_price, start_date, end_date])
+        
+        return pd.DataFrame(transformed_data, columns=['estate_id', 'price', 'start_date', 'end_date'])
+
+    def transformation_get_old_db(self):
+        """
+        Grabs the current price_history table and turns it into a df.
+        """
+        conn = self._get_connection()        
+        try:
+            query = f"SELECT * FROM price_history;"
+            df = pd.read_sql_query(query, conn)
+            conn.close()
+            print("data retrieved from table price_history")
+            return df
+        except sqlite3.Error as e:
+            logger_scraping.error(f'Error loading rows from table price_history: {e}') 
+            conn.rollback() 
+            conn.close()
+        
+    def transformation_create_new_table(self, df, table_name):    
+        conn = self._get_connection()  
+            
+        df.sort_values(by=['estate_id', 'crawled_at'], inplace=True)
+        print("sorted by price and date")
+        
+        df_v2 = self.transformation_create_dates(df)
+        print("data transformed to start/end_date")
+
+        try:
+            df_v2.to_sql(table_name, conn, if_exists='replace', index=False)
+            print(f"data written into new table: {table_name}")
+            conn.close()
+            return df_v2
+        except:
+            print(f"data NOT written into new table: {table_name}")
+            conn.close()
+            return df_v2
+        

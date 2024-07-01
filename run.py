@@ -127,7 +127,7 @@ class Runner:
         #? Take prices which are not yet in DB and load them into DB ??
         if len(df_new) > 0:
             try:
-                self.data_manager.insert_new_price(df_new)
+                self.data_manager.insert_new_price_v1(df_new)
                 #logger_scraping.info(f'Inserting into price_history DONE.')
                 self.utils._write_processed_prices(not_processed_files)
             except Exception as e:

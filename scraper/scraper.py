@@ -57,16 +57,20 @@ class SrealityScraper:
         This function processes multiple combinations of the filter
         And serves number of pages necessary to scrape those urls.
         """
-        
         counts = self.get_counts_of_categories()
-        
         urls = self.config.urls_to_scrape
         
         result = {}
         for combo in combinations:
             logger_scraping.info(f'Running scraper for {combo}')
             
-            num_pages = (counts[f"{combo}"]//per_page) + 1
+            #? this kinda handles dicts of count in dicts
+            cnt = counts[f"{combo}"]
+            try:
+                cnt = cnt["total"]
+                num_pages = (cnt//per_page) + 1
+            except:
+                num_pages = (cnt//per_page) + 1
             
             data = self._scrape_url(urls[combo],
                                     num_pages, 
