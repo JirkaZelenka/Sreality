@@ -141,13 +141,13 @@ class Utilities:
         
         return final_df
     
-    def prepare_price_history_csv_to_df(self) -> pd.DataFrame:   
+    def get_list_of_not_processed_files(self, name_of_file) -> list:   
         """
         This loads all file names in price_history folder and compares them with
         the list of file names in price_history_loaded.txt 
         """
         #TODO: put the .txt name into config here and in write()
-        list_of_loaded_files = f"{self.cf.project_path}/{self.cf.data_folder}/price_history_loaded.txt"
+        list_of_loaded_files = f"{self.cf.project_path}/{self.cf.data_folder}/{name_of_file}"
         folder_with_csv_files= f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.scraped_prices_folder}"
         files = os.listdir(folder_with_csv_files)
         
@@ -160,34 +160,31 @@ class Utilities:
                 
         not_processed_files = [x for x in files if x not in processed_files]
         logger_scraping.info(f'Processing {len(not_processed_files)} non-processed files with prices for DB.')
-             
-        dfs = []
-        for file_name in tqdm(not_processed_files):
-            file_path = os.path.join(folder_with_csv_files, file_name)
-
-            try:
-                with open(file_path, 'r') as file:
-                    data = pd.read_csv(file, sep=";", encoding="utf-8")
-                    
-                dfs.append(data)
-            except:
-                logger_scraping.error(f'There was an error in file {file_name}')
-                continue
         
-        df = pd.concat(dfs, ignore_index=True)
-        df.rename(columns={"code": "estate_id",'timestamp': 'crawled_at'}, inplace=True)
-
-        return df, not_processed_files
+        return not_processed_files
     
-    def _write_processed_prices(self, not_processed_files):
+    def process_file_to_df(self, file_name) -> pd.DataFrame:
         
-        list_of_loaded_files = f"{self.cf.project_path}/{self.cf.data_folder}/price_history_loaded.txt"
+        folder_with_csv_files= f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.scraped_prices_folder}"
+        file_path = os.path.join(folder_with_csv_files, file_name)
+        try:
+            with open(file_path, 'r') as file:
+                df = pd.read_csv(file, sep=";", encoding="utf-8")
+                df.rename(columns={"code": "estate_id",'timestamp': 'crawled_at'}, inplace=True)
+                return df       
+        except:
+            logger_scraping.error(f'There was an error in file {file_name}')
+        
+    def _write_processed_prices(self, not_processed_files, file_name):
+        #TODO: co má být _ a co ne?
+        
+        list_of_loaded_files = f"{self.cf.project_path}/{self.cf.data_folder}/{file_name}"
         
         for non_processed in not_processed_files:
             with open(list_of_loaded_files, 'a') as file:
                 file.write(non_processed + '\n')
         
-        logger_scraping.info(f'Newly processed price files were listed.')
+        #logger_scraping.info(f'Newly processed price files were listed.')
     
     #TODO: má to být self? nebo static?
     def translate_unicode(self,text: str) -> str:

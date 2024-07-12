@@ -331,58 +331,66 @@ class DataManager:
         try:
             cursor = conn.cursor()
             
-            for i in range(len(df)):
+            #? this is new data we want to store
+            for i in tqdm(range(len(df))):
                 r = df.iloc[i]
-                estate_id = str(r['estate_id'])
+                estate_id = str(r['estate_id'])                
                 price = str(r["price"])
                 crawled_at = str(r["crawled_at"])
+                #print(f"processing this record: {estate_id}, {price}, {crawled_at}")
                 
-                # Check the latest price entry for this estate_id
+                #? Check the latest price entry for this estate_id
+                #TODO: nebrat start_date, protože ho stejně nepoužívám..?
                 cursor.execute("""
-                    SELECT price, start_date, end_date 
-                    FROM price_history_new 
+                    SELECT estate_id, price, start_date, end_date 
+                    FROM price_history_new2 
                     WHERE estate_id = ? 
                     ORDER BY start_date DESC 
                     LIMIT 1
                     """, (estate_id,))
                 
                 latest_entry = cursor.fetchone()
+                #print(f"latest_entry: {latest_entry}")
                 
                 if latest_entry:
-                    latest_price, _latest_start_date, latest_end_date = latest_entry
+                    _estate_id, latest_price, _latest_start_date, latest_end_date = latest_entry
                     
-                    if latest_price != price:
-                        # Update the end_date of the previous price record
+                    #? If price changed, Update the end_date of the previous price record
+                    if str(latest_price) != str(price):
                         cursor.execute("""
-                            UPDATE price_history_new
+                            UPDATE price_history_new2
                             SET end_date = ?
                             WHERE estate_id = ? AND price = ? AND end_date = ?
                             """, (crawled_at, estate_id, latest_price, latest_end_date))
                         
-                        # Insert the new price record, START = END
+                        #? and also insert the new price record, START = END
                         cursor.execute("""
-                            INSERT INTO price_history_new (
+                            INSERT INTO price_history_new2 (
                             estate_id, price, start_date, end_date)
                             VALUES (?, ?, ?, ?)
                             """, (estate_id, price, crawled_at, crawled_at))
-                        print(f"This price {price} was New, so we inserted a new recored for {estate_id}: {(estate_id, price, crawled_at, crawled_at)}")
+                        
+                        #print(f"This price {price} was New, so we updated last price end date as:{estate_id, latest_price, crawled_at} ")
+                        #print(f"and we inserted a new record {(estate_id, price, crawled_at, crawled_at)}")
+                    
+                    #? If price is same, just update the end_date of the existing price
                     else:
-                        # Update the end_date of the existing price record if the price is the same
                         cursor.execute("""
-                            UPDATE price_history_new
+                            UPDATE price_history_new2
                             SET end_date = ?
                             WHERE estate_id = ? AND price = ? AND end_date = ?
                             """, (crawled_at, estate_id, price, latest_end_date))
-                        print(f"This price {price} already existed, so we just prolong the date: {crawled_at}")
+                        #print(f"This price {price} already existed, so we just prolong the date: {crawled_at}")
+                
+                #? If No previous record exists, insert the new price record
                 else:
-                    # If No previous record exists, insert the new price record
                     cursor.execute("""
-                        INSERT INTO price_history_new (
+                        INSERT INTO price_history_new2 (
                         estate_id, price, start_date, end_date)
                         VALUES (?, ?, ?, ?)
                         """, (estate_id, price, crawled_at, crawled_at))
-                    print(f"This estate_id {estate_id} is new  {estate_id, price, crawled_at, crawled_at} so we make first row of it: !")
-                          
+                    #print(f"This estate_id {estate_id} is new, so we make first row of it: {estate_id, price, crawled_at, crawled_at} !")  
+                      
             conn.commit()
 
         except sqlite3.Error as e:

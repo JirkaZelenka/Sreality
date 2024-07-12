@@ -2,6 +2,7 @@ import pandas as pd
 from typing import Optional
 import os
 import json
+from tqdm import tqdm
 
 from diagnostics.diagnostics import Diagnostics
 from scraper.scraper import SrealityScraper
@@ -113,28 +114,52 @@ class Runner:
         """
         
         logger_scraping.info(f'Starting processing CSVs to price_history table.')
-        df_new, not_processed_files = self.utils.prepare_price_history_csv_to_df()
-        df_new = df_new.drop_duplicates()
-        logger_scraping.info(f'Prepared {len(df_new)} new rows.')
+        not_processed_files = self.utils.get_list_of_not_processed_files("price_history_loaded.txt")
+        for file_name in tqdm(not_processed_files):
+            df_new = self.utils.process_file_to_df(file_name)
+            df_new = df_new.drop_duplicates()
+            #logger_scraping.info(f'Prepared {len(df_new)} new rows.')
         
-        """
-        df = self.data_manager.get_all_rows("price_history")
-        logger_scraping.info(f'Already {len(df)} rows in price_history.')
-        #? cool way how to find rows which are not part of another df
-        df_new = df_new[~df_new.isin(df.to_dict(orient='list')).all(axis=1)]
-        """
+            """
+            df = self.data_manager.get_all_rows("price_history")
+            logger_scraping.info(f'Already {len(df)} rows in price_history.')
+            #? cool way how to find rows which are not part of another df
+            df_new = df_new[~df_new.isin(df.to_dict(orient='list')).all(axis=1)]
+            """
 
-        #? Take prices which are not yet in DB and load them into DB ??
-        if len(df_new) > 0:
-            try:
-                self.data_manager.insert_new_price_v1(df_new)
-                #logger_scraping.info(f'Inserting into price_history DONE.')
-                self.utils._write_processed_prices(not_processed_files)
-            except Exception as e:
-                logger_scraping.error(f'Inserting into price_history failed: {e}')
-        else:
-            logger_scraping.info(f'No need to insert into price_history. DONE.')
-    
+            if len(df_new) > 0:
+                try:
+                    self.data_manager.insert_new_price_v1(df_new)
+                    self.utils._write_processed_prices([file_name], "price_history_loaded.txt")
+                except Exception as e:
+                    logger_scraping.error(f'Inserting into price_history failed for file {file_name}: {e}')
+            else:
+                logger_scraping.info(f'No need to insert into price_history bcs file {file_name} seems empty. DONE.')          
+
+    def input_all_prices_to_db2(self):
+        """
+        This process takes all existing CSVs with estate prices, 
+        compares the names to those in the price_history_loaded.txt,
+        and preprocess and insert the new ones into price_history table.
+        """
+        
+        logger_scraping.info(f'Starting processing CSVs to price_history_new2 table.')
+        not_processed_files = self.utils.get_list_of_not_processed_files("price_history_loaded - kopie.txt")
+        print(len(not_processed_files))
+        for file_name in not_processed_files:
+            df_new = self.utils.process_file_to_df(file_name)
+            df_new = df_new.drop_duplicates()
+
+            if len(df_new) > 0:
+                try:
+                    self.data_manager.insert_new_price_v2(df_new)
+                    self.utils._write_processed_prices([file_name], "price_history_loaded - kopie.txt")
+                except Exception as e:
+                    logger_scraping.error(f'Inserting into price_history failed for file {file_name}: {e}')
+            else:
+                logger_scraping.info(f'No need to insert into price_history bcs file {file_name} seems empty. DONE.')
+        
+        
     def run_complete_scraping(self,
                               combinations: list["str"]
                               )->pd.DataFrame:
@@ -148,8 +173,13 @@ class Runner:
         
         self.update_geodata(list_of_jsons=None)
         
+        #TODO: do this repeatedly, bcs it might fail ocassionaly
         self.input_all_estates_to_db()
         self.input_all_prices_to_db()
+        #self.input_all_prices_to_db2()
+        #TODO: pokud chci běžet oboje, tak musím mít buď dva listy na zpracované soubory, 
+        #todo nebo obě insert1 a insert2 spojit dovnitř input_all_prices, logicky. po obou se zapíše file.
+        #todo: po souhrnném testu (a obětování dat 04-05) commit. a udržování obou DB.
         
         discounts_all = self.diag.discounts_in_last_batch(filters=None)
         self.mailing.send_email(subject=f'SREALITY - DISCOUNTS {discounts_all["Last Date"]}',
@@ -161,6 +191,7 @@ class Runner:
         
         logger_scraping.info(f'FINISHING complete process of data gathering.')
 
+    #TODO: use it:)
     def update_empty_estates(self):
         
         folder_with_estate_details = f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.estate_details_folder}"
@@ -169,7 +200,7 @@ class Runner:
         for file in files:
             with open(file, 'r') as file:
                 data = json.load(file)
-                # TODO: pro každý item ve file se porskenuje a spuší na LISTU IDs updating
+                # TODO: pro každý item ve file se porskenuje a spustí na LISTU IDs updating
             
 
     def diagnostics_after_run(self):
