@@ -1,14 +1,10 @@
-from datetime import datetime
 import pandas as pd
 from tqdm import tqdm
-import re
-
 import sqlite3
-import os
 
 from config import Config 
 
-from utils.logger import logger
+from utils.logger import logger_scraping
 
 class DataManager:
     """
@@ -26,10 +22,58 @@ class DataManager:
             conn = sqlite3.connect(f"{self.cf.project_path}/{self.cf.db_name}")
             return conn
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error connecting to database: {e}') 
+            logger_scraping.error(f'Error connecting to database: {e}') 
 
             return None
 
+    def get_count_estates(self, table_name="estate_detail"):
+        
+        conn = self._get_connection()        
+        try:
+            f"SELECT * FROM {table_name}"
+            
+            #? these names go to the table in the FastAPI
+            query = f"""SELECT 
+                        COUNT(*) as 'estate count', 
+                        COUNT(DISTINCT estate_id) as 'unique estate count',
+                        MIN(DISTINCT DATE(crawled_at)) as 'first day',
+                        MAX(DISTINCT DATE(crawled_at)) as 'last day',
+                        MAX(DISTINCT crawled_at) as 'last scraping',
+                        COUNT(DISTINCT region) as 'regions count',
+                        COUNT(DISTINCT district) as 'district count',
+                        COUNT(DISTINCT city) as 'city count'
+                    FROM {table_name};"""            
+            
+            df = pd.read_sql_query(query, conn)
+            conn.close()
+            return df
+        
+        except sqlite3.Error as e:
+            logger_scraping.error(f'Error loading rows from table {table_name}: {e}') 
+            conn.rollback()
+        
+        conn.close()
+        
+    def get_count_prices(self, table_name="price_history"):
+        
+        conn = self._get_connection()        
+        try:
+            f"SELECT * FROM {table_name}"
+            
+            query = f"""SELECT 
+                        COUNT(*) as 'all_rows'
+                    FROM {table_name};"""            
+            
+            df = pd.read_sql_query(query, conn)
+            conn.close()
+            return df
+        
+        except sqlite3.Error as e:
+            logger_scraping.error(f'Error loading rows from table {table_name}: {e}') 
+            conn.rollback()
+        
+        conn.close()
+    
     def get_all_rows(self, table_name):
         
         conn = self._get_connection()        
@@ -40,7 +84,38 @@ class DataManager:
             return df
         
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error loading rows from table {table_name}: {e}') 
+            logger_scraping.error(f'Error loading rows from table {table_name}: {e}') 
+            conn.rollback()
+        
+        conn.close()
+    
+    #TODO: delete later? when new structure of prices holds
+    def get_price_rows_for_test(self, number):
+        
+        conn = self._get_connection()        
+        try:
+            query = f"SELECT distinct estate_id, crawled_at FROM price_history limit {number}"
+            df = pd.read_sql_query(query, conn)
+            conn.close()
+            return df
+        
+        except sqlite3.Error as e:
+            logger_scraping.error(f'Error loading rows from table price_history for test: {e}') 
+            conn.rollback()
+        
+        conn.close()
+        
+    def get_all_rows_from_date(self, table_name, timestamp):
+        
+        conn = self._get_connection()        
+        try:
+            query = f"SELECT * FROM {table_name} WHERE crawled_at = '{timestamp}'"
+            df = pd.read_sql_query(query, conn)
+            conn.close()
+            return df
+        
+        except sqlite3.Error as e:
+            logger_scraping.error(f'Error loading rows from table {table_name} for timestamp {timestamp}: {e}') 
             conn.rollback()
         
         conn.close()
@@ -54,7 +129,7 @@ class DataManager:
             conn.commit()
             cursor.close()
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error clearing table {table_name}: {e}') 
+            logger_scraping.error(f'Error clearing table {table_name}: {e}') 
             conn.rollback()
         
         conn.close()
@@ -68,7 +143,7 @@ class DataManager:
             conn.commit()
             cursor.close()
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error dropping table {table_name}: {e}') 
+            logger_scraping.error(f'Error dropping table {table_name}: {e}') 
             conn.rollback()
         
         conn.close()
@@ -84,7 +159,7 @@ class DataManager:
             conn.commit()
             cursor.close()
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error creating table {table_name}: {e}') 
+            logger_scraping.error(f'Error creating table {table_name}: {e}') 
             conn.rollback()
         
         conn.close()
@@ -99,12 +174,14 @@ class DataManager:
             for i in range(len(df)):
                 r = df.iloc[i]
                 data_to_upload.append([
-                    str(r['code']),
+                    str(r['estate_id']),
                     str(r['description']),
                     str(r['meta_description']),
                     str(r['category_main_cb']),
                     str(r['category_type_cb']),
                     str(r['category_sub_cb']),
+                    str(r['locality_url']),
+                    str(r['estate_url']),
                     str(r['broker_id']),
                     str(r['broker_company']),
                     str(r['furnished']),
@@ -127,6 +204,8 @@ class DataManager:
                     str(r['balcony']),
                     str(r['loggia']),
                     str(r['basin']),
+                    str(r['elevator']),
+                    str(r['estate_area']),
                     str(r['cellar']),
                     str(r['building_type']),
                     str(r['object_kind']),
@@ -154,14 +233,14 @@ class DataManager:
 
             query = f"""
                     INSERT INTO estate_detail (
-                    code, description, meta_description,
-                    category_main_cb, category_type_cb, category_sub_cb,
+                    estate_id, description, meta_description,
+                    category_main_cb, category_type_cb, category_sub_cb, locality_url, estate_url,
                     broker_id, broker_company, furnished,
                     latitude, longitude, locality, city, district, region,
                     object_type, parking_lots, locality_street_id, locality_district_id,
                     locality_ward_id, locality_region_id, locality_quarter_id,
                     locality_municipality_id, locality_country_id, terrace, balcony,
-                    loggia, basin, cellar, building_type, object_kind,
+                    loggia, basin, elevator, estate_area, cellar, building_type, object_kind,
                     ownership, low_energy, easy_access, building_condition, garage,
                     room_count_cb, energy_efficiency_rating_cb, note_about_price,
                     id_of_order, last_update, material, age_of_building,
@@ -172,13 +251,14 @@ class DataManager:
                             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
                             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
                             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
+                            ?, ?, ?, ?, ?)
                     """             
             cursor.executemany(query, data_to_upload)
             conn.commit()
 
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error inserting offer: {e}')        
+            logger_scraping.error(f'Error inserting offer: {e}')        
             conn.rollback()
             
         conn.close()
@@ -210,12 +290,12 @@ class DataManager:
             conn.commit()
 
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error updating offer: {e}')        
+            logger_scraping.error(f'Error updating offer: {e}')        
             conn.rollback()
             
         conn.close()
     
-    def insert_new_price(self, df):
+    def insert_new_price_v1(self, df):
         
         conn = self._get_connection()
         try:
@@ -240,12 +320,140 @@ class DataManager:
             conn.commit()
 
         except sqlite3.Error as e:
-            logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Error inserting offer: {e}')        
+            logger_scraping.error(f'Error inserting offer: {e}')        
             conn.rollback()
             
         conn.close()
    
-    
+    def insert_new_price_v2(self, df):
+        
+        conn = self._get_connection()
+        try:
+            cursor = conn.cursor()
+            
+            for i in range(len(df)):
+                r = df.iloc[i]
+                estate_id = str(r['estate_id'])
+                price = str(r["price"])
+                crawled_at = str(r["crawled_at"])
+                
+                # Check the latest price entry for this estate_id
+                cursor.execute("""
+                    SELECT price, start_date, end_date 
+                    FROM price_history_new 
+                    WHERE estate_id = ? 
+                    ORDER BY start_date DESC 
+                    LIMIT 1
+                    """, (estate_id,))
+                
+                latest_entry = cursor.fetchone()
+                
+                if latest_entry:
+                    latest_price, _latest_start_date, latest_end_date = latest_entry
+                    
+                    if latest_price != price:
+                        # Update the end_date of the previous price record
+                        cursor.execute("""
+                            UPDATE price_history_new
+                            SET end_date = ?
+                            WHERE estate_id = ? AND price = ? AND end_date = ?
+                            """, (crawled_at, estate_id, latest_price, latest_end_date))
+                        
+                        # Insert the new price record, START = END
+                        cursor.execute("""
+                            INSERT INTO price_history_new (
+                            estate_id, price, start_date, end_date)
+                            VALUES (?, ?, ?, ?)
+                            """, (estate_id, price, crawled_at, crawled_at))
+                        print(f"This price {price} was New, so we inserted a new recored for {estate_id}: {(estate_id, price, crawled_at, crawled_at)}")
+                    else:
+                        # Update the end_date of the existing price record if the price is the same
+                        cursor.execute("""
+                            UPDATE price_history_new
+                            SET end_date = ?
+                            WHERE estate_id = ? AND price = ? AND end_date = ?
+                            """, (crawled_at, estate_id, price, latest_end_date))
+                        print(f"This price {price} already existed, so we just prolong the date: {crawled_at}")
+                else:
+                    # If No previous record exists, insert the new price record
+                    cursor.execute("""
+                        INSERT INTO price_history_new (
+                        estate_id, price, start_date, end_date)
+                        VALUES (?, ?, ?, ?)
+                        """, (estate_id, price, crawled_at, crawled_at))
+                    print(f"This estate_id {estate_id} is new  {estate_id, price, crawled_at, crawled_at} so we make first row of it: !")
+                          
+            conn.commit()
 
-    
+        except sqlite3.Error as e:
+            logger_scraping.error(f'Error inserting offer: {e}')        
+            conn.rollback()
+            
+        conn.close()
 
+    def transformation_create_dates(self, df):
+        """
+        Group DF by estate_id, order chronologically, and group the consecutive prices, 
+        creating start_date and end_date.
+        """
+        transformed_data = []
+        for estate_id, group in df.groupby('estate_id'):
+            group = group.sort_values(by='crawled_at').reset_index(drop=True)
+            
+            if group.empty:
+                continue
+
+            current_price = group.at[0, 'price']
+            start_date = group.at[0, 'crawled_at']
+            end_date = None
+            
+            for i in range(1, len(group)):
+                next_start_date = group.at[i, 'crawled_at']
+                
+                if group.at[i, 'price'] == current_price:
+                    end_date = next_start_date
+                else:
+                    transformed_data.append([estate_id, current_price, start_date, next_start_date])
+                    current_price = group.at[i, 'price']
+                    start_date = next_start_date
+                    end_date = None
+
+            transformed_data.append([estate_id, current_price, start_date, end_date])
+        
+        return pd.DataFrame(transformed_data, columns=['estate_id', 'price', 'start_date', 'end_date'])
+
+    def transformation_get_old_db(self):
+        """
+        Grabs the current price_history table and turns it into a df.
+        """
+        conn = self._get_connection()        
+        try:
+            query = f"SELECT * FROM price_history;"
+            df = pd.read_sql_query(query, conn)
+            conn.close()
+            print("data retrieved from table price_history")
+            return df
+        except sqlite3.Error as e:
+            logger_scraping.error(f'Error loading rows from table price_history: {e}') 
+            conn.rollback() 
+            conn.close()
+        
+    def transformation_create_new_table(self, df, table_name):    
+        conn = self._get_connection()  
+            
+        df.sort_values(by=['estate_id', 'crawled_at'], inplace=True)
+        print("sorted by price and date")
+        
+        df_v2 = self.transformation_create_dates(df)
+        print("data transformed to start/end_date")
+
+        try:
+            df_v2.to_sql(table_name, conn, if_exists='replace', index=False)
+            print(f"data written into new table: {table_name}")
+            conn.close()
+            return df_v2
+        except:
+            print(f"data NOT written into new table: {table_name}")
+            conn.close()
+            return df_v2
+        

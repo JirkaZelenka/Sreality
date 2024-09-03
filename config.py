@@ -19,54 +19,99 @@ class Config:
                                     "receiver_email": os.getenv("receiver_email")
                                     }
         
+        self.urls_to_scrape = {"all"           : "https://www.sreality.cz/api/cs/v2/estates" 
+                            ,"prodej_byty"     : "https://www.sreality.cz/api/cs/v2/estates?category_type_cb=1&category_main_cb=1"
+                            ,"prodej_domy"     : "https://www.sreality.cz/api/cs/v2/estates?category_type_cb=1&category_main_cb=2"
+                            ,"prodej_pozemky"  : "https://www.sreality.cz/api/cs/v2/estates?category_type_cb=1&category_main_cb=3"
+                            ,"prodej_komercni" : "https://www.sreality.cz/api/cs/v2/estates?category_type_cb=1&category_main_cb=4"
+                            ,"prodej_ostatni"  : "https://www.sreality.cz/api/cs/v2/estates?category_type_cb=1&category_main_cb=5"
+                            ,"pronajem_byty"     : "https://www.sreality.cz/api/cs/v2/estates?category_type_cb=2&category_main_cb=1"
+                            ,"pronajem_domy"     : "https://www.sreality.cz/api/cs/v2/estates?category_type_cb=2&category_main_cb=2"
+                            ,"pronajem_pozemky"  : "https://www.sreality.cz/api/cs/v2/estates?category_type_cb=2&category_main_cb=3"
+                            ,"pronajem_komercni" : "https://www.sreality.cz/api/cs/v2/estates?category_type_cb=2&category_main_cb=4"
+                            ,"pronajem_ostatni"  : "https://www.sreality.cz/api/cs/v2/estates?category_type_cb=2&category_main_cb=5"
+                            }
+        
         # category_type_cb
         self.type_of_deal={"1": "prodej",
-                        "2": "pronájem",
-                        "3": "dražba",
-                        "4": "prodej podílu",
-                        }
+                           "2": "pronájem",
+                           "3": "dražba",
+                           "4": "podíly", # oficially "prodej podílu", but "podily" fots the URL
+                           }
         
         # category_main_cb
         self.type_of_building={"1": "byt",
-                            "2": "dům",
-                            "3": "pozemek",
-                            "4": "komerční nemovitost a nebytový prostor",
-                            "5": "ostatní",
-                            }
+                               "2": "dům",
+                               "3": "pozemek",
+                               "4": "komerční nemovitost a nebytový prostor",
+                               "5": "ostatní",
+                               }
 
         # category_sub_cb
         self.type_of_rooms={"1" : "N/A",
-                        "2": "1+kk",
-                        "3": "1+1",
-                        "4": "2+kk",
-                        "5": "2+1",
-                        "6": "3+kk",
-                        "7": "3+1",
-                        "8": "4+kk",
-                        "9": "4+1",
-                        "10": "5+kk",
-                        "11": "5+1",
-                        "12": "6 pokoju a vic",
-                        "16": "atypické",
-                        "19": "stavební parcela",
-                        "23": "zahrada" ,
-                        "33": "chata" ,
-                        "37": "rodinný" ,
-                        "39": "vila",
-                        "47": "pronájem pokoje"
-                        }
+                            "2": "1+kk",
+                            "3": "1+1",
+                            "4": "2+kk",
+                            "5": "2+1",
+                            "6": "3+kk",
+                            "7": "3+1",
+                            "8": "4+kk",
+                            "9": "4+1",
+                            "10": "5+kk",
+                            "11": "5+1",
+                            "12": "6-a-vice", # "6 pokoju a vic"
+                            "16": "atypické",
+                            "18": "komerční", #
+                            "19": "bydleni", # "stavební parcela",
+                            "20": "pole", #
+                            "21": "les", #
+                            "22": "louka", #
+                            "23": "zahrada",
+                            "24": "ostatní-pozemky", # 
+                            "25": "kancelář", #
+                            "26": "sklad", #
+                            "27": "výrobni-prostor",  # "výrobní hala"
+                            "28": "obchodní-prostor",  #
+                            "29": "ubytování", # "ubytovací zařízení"
+                            "30": "restaurace", #
+                            "31": "zemědělský", # "zemědělský objekt"
+                            "32": "komerční", # "komerční nemovitost"
+                            "33": "chata",
+                            "34": "garáž", #
+                            "35": "památka", #
+                            "36": "jiné-nemovitosti", # "specifický typ nemovitosti"
+                            "37": "rodinný",
+                            "38": "činžovní-dům", #
+                            "39": "vila",
+                            "40": "na-klíč", # "projekt na klíč"
+                            "43": "chalupa",
+                            "44": "zemědělská-usedlost", #
+                            "46": "rybník",
+                            "47": "pokoj", # "pronájem pokoje"
+                            "48": "sady-vinice", #
+                            "49": "virtuální-kancelář", #
+                            "50": "rodinný", # "vinný sklep"
+                            "51": "půdní-prostor", #
+                            "52": "garážové-stání", #
+                            "53": "mobilní-domek", # "mobilheim"
+                            "54": "vícegenerační", #
+                            "56": "komerční", # "ordinace"
+                            "57": "apartmány" #
+                            }
                 
         self.table_definitions={
             "estate_detail": 
                     """ 
                     CREATE TABLE IF NOT EXISTS estate_detail (
                     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                    code VARCHAR(255) NOT NULL,
+                    estate_id VARCHAR(255) NOT NULL,
                     description VARCHAR(255) NOT NULL,
                     meta_description VARCHAR(255) NOT NULL,
                     category_main_cb INTEGER NOT NULL,
                     category_type_cb INTEGER NOT NULL,
                     category_sub_cb INTEGER NOT NULL,
+                    locality_url VARCHAR(255) NOT NULL,
+                    estate_url VARCHAR(255) NOT NULL,
                     broker_id INTEGER NOT NULL,
                     broker_company VARCHAR(255) NOT NULL,
                     furnished INTEGER NOT NULL,
@@ -89,6 +134,8 @@ class Config:
                     balcony INTEGER NOT NULL,
                     loggia INTEGER NOT NULL,
                     basin INTEGER NOT NULL,
+                    elevator INTEGER NOT NULL,
+                    estate_area INTEGER NOT NULL,
                     cellar INTEGER NOT NULL,
                     building_type INTEGER NOT NULL,
                     object_kind INTEGER NOT NULL,
@@ -118,10 +165,22 @@ class Config:
                     """ 
                     CREATE TABLE IF NOT EXISTS price_history (
                     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                    estate_id INTEGER NOT NULL,
+                    estate_id VARCHAR(255) NOT NULL,
                     price INTEGER NOT NULL,
                     crawled_at datetime NOT NULL,
                     FOREIGN KEY (estate_id) REFERENCES estate_detail (id)
                     ); 
-                    """                
+                    """,
+            "price_history_new": 
+                    """ 
+                    CREATE TABLE IF NOT EXISTS price_history_new (
+                    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    estate_id VARCHAR(255) NOT NULL,
+                    price INTEGER NOT NULL,
+                    start_date datetime NOT NULL,
+                    end_date datetime NOT NULL,
+                    FOREIGN KEY (estate_id) REFERENCES estate_detail (id)
+                    ); 
+                    """                  
         }
+        

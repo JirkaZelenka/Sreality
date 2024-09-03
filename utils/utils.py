@@ -1,17 +1,13 @@
 from datetime import datetime
-from typing import Optional
 import os
 import json
 import pandas as pd
 from tqdm import tqdm
-
-##### GeoPy ############        
-from geopy.geocoders import Nominatim   # Geolocator   # pip install geopy  
-from geopy.exc import GeocoderTimedOut  # for Error handling
+import unicodedata
 
 from config import Config
 
-from utils.logger import logger
+from utils.logger import logger_scraping
 
 class Utilities:
     
@@ -22,7 +18,7 @@ class Utilities:
     def generate_timestamp() -> str:
         current_datetime = datetime.now()
         full_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
-        date_to_save = current_datetime.strftime("%Y%m%d_%H%M")
+        date_to_save = current_datetime.strftime("%Y%m%d_%H%M%S")
                 
         return full_datetime, date_to_save
     
@@ -31,7 +27,7 @@ class Utilities:
         file_path = f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.scraped_prices_folder}/{filename}.csv" 
         
         if os.path.exists(file_path):
-            logger.info(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: Name {filename} in {file_path} already exists. Saving as {filename}_SAFE')
+            logger_scraping.info(f'Name {filename} in {file_path} already exists. Saving as {filename}_SAFE')
             filename += "_SAFE"
             file_path = f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.scraped_prices_folder}/{filename}.csv" 
             df.to_csv(file_path, sep=";", encoding="utf-8", index=False)
@@ -40,13 +36,22 @@ class Utilities:
             df.to_csv(file_path, sep=";", encoding="utf-8", index=False)
             
     def translate_type_of_building(self, code_category_main_cb):
-        return self.cf.type_of_building[str(code_category_main_cb)]
+        if code_category_main_cb is not None and not pd.isna(code_category_main_cb):
+            return self.cf.type_of_building[str(int(code_category_main_cb))]
+        else:
+            return "x"
     
     def translate_type_of_deal(self, code_category_type_cb):
-        return self.cf.type_of_deal[str(code_category_type_cb)]
+        if code_category_type_cb is not None and not pd.isna(code_category_type_cb):
+            return self.cf.type_of_deal[str(int(code_category_type_cb))]
+        else:
+            return "x"
     
     def translate_type_of_rooms(self, code_category_sub_cb):
-        return self.cf.type_of_rooms[str(code_category_sub_cb)]
+        if code_category_sub_cb is not None and not pd.isna(code_category_sub_cb):
+            return self.cf.type_of_rooms[str(int(code_category_sub_cb))]
+        else:
+            return "x"
     
     def compare_codes_to_existing_jsons(self, codes_not_found: list[str]) -> list[str]:
         """
@@ -60,8 +65,9 @@ class Utilities:
 
             with open(file_path, 'r') as file:
                 data = json.load(file)
-            
-            codes_from_json = [str(item['code']) for item in data]
+                
+            #TODO: this might backfire, this used to be code before for all
+            codes_from_json = [str(item['estate_id']) for item in data]
     
             codes_not_found = [x for x in codes_not_found if x not in codes_from_json]
                     
@@ -70,7 +76,6 @@ class Utilities:
     def save_progress_json(self, files_with_code, date_to_save):
         file_path = f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.estate_details_folder}/{date_to_save}.json"
 
-        # Save to JSON
         with open(file_path, 'w') as f:
             json.dump(files_with_code, f, indent=4)  
     
@@ -83,6 +88,7 @@ class Utilities:
         folder_with_jsons_files= f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.estate_details_folder}"
         files = os.listdir(folder_with_jsons_files)
         
+        #? first prepare list of DFs, concat after - it's much faster
         dfs = []
         print("PREPARING Estate details JSONs to DF")
         for file_name in tqdm(files):
@@ -107,28 +113,56 @@ class Utilities:
         final_df = pd.concat(dfs, ignore_index=True, sort=False)
         
         for c in ["note_about_price", "id_of_order", "last_update", "material",
-                  "age_of_building", "ownership_type", "floor", "usable_area",
+                  "age_of_building", "ownership_type", "floor", "usable_area", "elevator", "estate_area",
                   "floor_area", "energy_efficiency_rating", "no_barriers", "start_of_offer",
+                  "locality_url" #? unfortunately unavailable for old scraped data, but necessary
                   ]:
             if c not in final_df.columns:
                 final_df[c] = "-"
         
+        final_df.rename(columns={"code": "estate_id"})
+        
+        #? detail/pronajem/byt/2+1/bilina-teplicke-predmesti-sidliste-shd/3980883276  
+        final_df['category_type_cb_translated'] = final_df['category_type_cb'].apply(self.translate_type_of_deal).apply(self.translate_unicode)
+        final_df['category_main_cb_translated'] = final_df['category_main_cb'].apply(self.translate_type_of_building).apply(self.translate_unicode)
+        final_df['category_sub_cb_translated'] = final_df['category_sub_cb'].apply(self.translate_type_of_rooms).apply(self.translate_unicode)
+        final_df["locality_url"] = final_df["locality_url"].astype(str).apply(self.remove_trailing_dash)
+    
+        #TODO: fix the issue with locality name with spaces - this replace doesnt work
+        final_df["estate_url"] = "https://www.sreality.cz/detail/" + \
+                                final_df["category_type_cb_translated"].astype(str) + "/" + \
+                                final_df["category_main_cb_translated"].astype(str) + "/" + \
+                                final_df["category_sub_cb_translated"].astype(str) + "/" + \
+                                final_df["locality_url"].str.replace(' ', '-') + "/" + \
+                                final_df["estate_id"].astype(str)
+        
         final_df.fillna("-", inplace=True)
+        final_df = final_df.drop_duplicates()
         
         return final_df
     
     def prepare_price_history_csv_to_df(self) -> pd.DataFrame:   
         """
-        Takes all CSV file with price_history.
-        Prepare list of dataframes, and in the end concats them.
+        This loads all file names in price_history folder and compares them with
+        the list of file names in price_history_loaded.txt 
         """
-        
+        #TODO: put the .txt name into config here and in write()
+        list_of_loaded_files = f"{self.cf.project_path}/{self.cf.data_folder}/price_history_loaded.txt"
         folder_with_csv_files= f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.scraped_prices_folder}"
         files = os.listdir(folder_with_csv_files)
         
+        if not os.path.exists(list_of_loaded_files):
+            processed_files = set()  
+        else:
+            with open(list_of_loaded_files, 'r') as file:
+                processed_files = set(line.strip() for line in file)
+                print(f"there are already {len(processed_files)} processed files")   
+                
+        not_processed_files = [x for x in files if x not in processed_files]
+        logger_scraping.info(f'Processing {len(not_processed_files)} non-processed files with prices for DB.')
+             
         dfs = []
-        print("PREPARING Price history CSVs to DF")
-        for file_name in tqdm(files):
+        for file_name in tqdm(not_processed_files):
             file_path = os.path.join(folder_with_csv_files, file_name)
 
             try:
@@ -137,111 +171,36 @@ class Utilities:
                     
                 dfs.append(data)
             except:
-                logger.error(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}: There was an error in file {file_name}')
+                logger_scraping.error(f'There was an error in file {file_name}')
                 continue
         
         df = pd.concat(dfs, ignore_index=True)
         df.rename(columns={"code": "estate_id",'timestamp': 'crawled_at'}, inplace=True)
 
-        return df 
+        return df, not_processed_files
+    
+    def _write_processed_prices(self, not_processed_files):
+        
+        list_of_loaded_files = f"{self.cf.project_path}/{self.cf.data_folder}/price_history_loaded.txt"
+        
+        for non_processed in not_processed_files:
+            with open(list_of_loaded_files, 'a') as file:
+                file.write(non_processed + '\n')
+        
+        logger_scraping.info(f'Newly processed price files were listed.')
+    
+    #TODO: má to být self? nebo static?
+    def translate_unicode(self,text: str) -> str:
+        if text is None: return "x"
+        else: return unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8')
+
+    def remove_trailing_dash(self, text: str) -> str:
+        return text.rstrip('-')
+    
+    
     
     def scrape_incomplete_estates(self, df: pd.DataFrame) -> pd.DataFrame:
         raise NotImplementedError
     
     def identify_suspicious_offers(self, df: pd.DataFrame) -> pd.DataFrame:
         raise NotImplementedError
-    
-    
-    
-class GeoData:
-    def __init__(self) -> None: 
-        self.cf = Config()  
-    
-    def get_location(self, lat: float, lon: float)-> str:
-        try:
-            geolocator = Nominatim(timeout = 20, user_agent = "JZ_Sreality")   # Pomohlo změnit jméno, proti "Error 403" !!        
-            geo_input = ", ".join([str(lat), str(lon)])
-            return str(geolocator.reverse(geo_input))           
-        except:
-            return "-, -, -, -, -, - ,-"
-    
-    def parse_location(self, location: str) -> dict: 
-        try:
-            items = location.split(",")
-            
-            if len(items) >= 7 and (items[-5].strip().startswith("okres") or
-                                    items[-5].strip().startswith("obvod")):
-                oblast = items[-7].strip() if len(items) >= 7 else "-"
-                return {
-                    "oblast": oblast,
-                    "město": items[-6].strip(),
-                    "okres": items[-5].strip(),
-                    "kraj": items[-4].strip()
-                }
-            elif len(items) >= 6 and (items[-4].strip().startswith("okres") or
-                                    items[-4].strip().startswith("obvod")):
-                return {
-                    "oblast": "-" if len(items) < 7 else items[-6].strip(),
-                    "město": items[-5].strip(),
-                    "okres": items[-4].strip(),
-                    "kraj": items[-3].strip()
-                }
-            else:
-                return {
-                    "oblast": "-",
-                    "město": "-",
-                    "okres": "-",
-                    "kraj": "-"
-                }
-        except:
-            return {
-                "oblast": "-",
-                "město": "-",
-                "okres": "-",
-                "kraj": "-"
-            }
-     
-    def assign_location_to_df(self, df: pd.DataFrame) -> pd.DataFrame:
-        
-        #? nice way how to use tqdm for apply operations ! (progress_apply instead of apply)
-        tqdm.pandas(desc="Processing Locations", total=len(df))
-        df["locality_to_parse"] = df.progress_apply(lambda row: self.get_location(row["locality_gps_lat"], row["locality_gps_lon"]), axis=1)
-        
-        df[['locality', 'city', 'district', 'region']] = df['locality_to_parse'].apply(lambda x: pd.Series(self.parse_location(x)))
-
-        return df
-    
-    def enrich_jsons_with_geodata(self, list_of_jsons: None) -> pd.DataFrame:   
-        """
-        Works with list of JSONs names, if not provided, process all files in the folder.
-        Files that are already translated in target folder are skipped.
-        For each file, creates new json with geolocation data.
-        """
-        
-        source_folder= f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.estate_details_folder}"
-        files = os.listdir(source_folder) if not list_of_jsons else list_of_jsons
-        target_folder = f"{self.cf.project_path}/{self.cf.data_folder}/{self.cf.geo_locations_folder}"
-        
-        print("ENRICHING geolocation data.")
-        for file_name in tqdm(files):        
-            source_path = os.path.join(source_folder, file_name)
-            save_file_name = f"geodata_{file_name}"
-            target_path = os.path.join(target_folder, save_file_name)
-            
-            if os.path.exists(target_path):
-                continue
-
-            with open(source_path, 'r') as file:
-                data = json.load(file)
-                df = pd.DataFrame(data)
-
-            enriched_df = self.assign_location_to_df(df)
-            
-            data_to_save = enriched_df[["locality_gps_lat", "locality_gps_lon",
-                                        "locality", "city", "district", "region"
-                                        ]].to_dict(orient='records')
-            
-            with open(target_path, 'w') as json_file:
-                json.dump(data_to_save, json_file, indent=4)
-    
-        

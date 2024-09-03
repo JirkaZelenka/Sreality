@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sreality App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-right: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        .tables-container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .table-wrapper {
+            flex: 1;
+            margin: 10px;
+        }
+        .log-content {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-y: scroll;
+            height: 300px;
+            width: 1200px;
+            white-space: pre-wrap;
+        }
+        .progress-bar {
+            width: 100%;
+            background-color: #f3f3f3;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+        .progress-bar-fill {
+            height: 30px;
+            width: 0;
+            background-color: #4caf50;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sreality App
+            <button id="refersh-all-button" class="button" onclick="refreshAll()">Refresh All</button>
+        </h1>
+        <h2>Send diagnostics of the last timestamp: 
+            <button id="send-email-button" class="button" onclick="sendMail()">Send Email</button>
+        </h2>
+        <h2>Scraping Log <button id="refresh-log-button" class="button" onclick="refreshLogs()">Refresh</button></h1>
+        <pre class="log-content">{{ log_content }}</pre>
+
+        <div class="container">
+            <!-- existing content -->
+            
+            <h2>Scrape Items:</h2>
+            <form id="scrape-form">
+                <div>
+                    <input type="checkbox" name="item" value="item1"> Item 1<br>
+                    <input type="checkbox" name="item" value="item2"> Item 2<br>
+                    <input type="checkbox" name="item" value="item3"> Item 3<br>
+                </div>
+                <button type="button" class="button" onclick="startScraping()">TBD: Start Scraping</button>
+            </form>
+            
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="progress-bar-fill">0%</div>
+            </div>
+        </div>
+
+        <div class="tables-container">
+            <div class="table-wrapper">
+                <h1>My DB Statistics <button id="refresh-db-stats-button" class="button" onclick="refreshDbStats()">Refresh</button></h1>
+                <table id="db-stats-table">
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for key, value in db_stats.items() %}
+                            <tr>
+                                <th>{{ key }}:</th>
+                                <td>{{ value }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-wrapper">
+                <h1>Market Statistics <button id="refresh-market-stats-button" class="button" onclick="refreshMarketStats()">Refresh</button></h1>
+                <table id="market-stats-table">
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for key, value in market_stats.items() %}
+                            <tr>
+                                <th>{{ key }}:</th>
+                                <td>{{ value }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateTable(tableId, data) {
+            const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+            table.innerHTML = ''; // Clear existing table content
+        
+            for (const key in data) {
+                if (typeof data[key] === 'object' && data[key] !== null) {
+                    const row = table.insertRow();
+                    const cellKey = row.insertCell(0);
+                    const cellValue1 = row.insertCell(1);
+                    const cellValue2 = row.insertCell(2);
+        
+                    cellKey.textContent = key + ':';
+                    cellValue1.textContent = data[key].total || 'N/A';
+                    cellValue2.textContent = `Praha: ${data[key].praha || 'N/A'}, Středočeský: ${data[key].stredocesky || 'N/A'}`;
+                } else {
+                    const row = table.insertRow();
+                    const cellKey = row.insertCell(0);
+                    const cellValue = row.insertCell(1);
+                    cellKey.textContent = key + ':';
+                    cellValue.textContent = data[key];
+                }
+            }
+        }
+
+        function sendMail() {
+            const button = document.getElementById('send-email-button');
+            button.disabled = true;
+            fetch('/send_email_discounts/', { method: 'GET' })
+                .then(response => {
+                    if (response.ok) {
+                        alert("Email sent successfully!");
+                    } else {
+                        alert("Failed to send email.");
+                    }
+                })
+                .finally(() => {
+                    button.disabled = false;
+                });
+        }
+        
+        function refreshAll() {
+            const button = document.getElementById('refresh-all-button');
+            button.disabled = true;
+
+           fetch('/get_logs/')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('log-content').innerText = data;
+                })
+
+            fetch('/get_db_stats/')
+                .then(response => response.json())
+                .then(data => {
+                    updateTable('db-stats-table', data);
+                })
+
+            fetch('/get_market_stats/')
+                .then(response => response.json())
+                .then(data => {
+                    updateTable('market-stats-table', data);
+                })
+                .finally(() => {
+                    button.disabled = false;
+                });
+        }
+
+        function refreshLogs() {
+            const button = document.getElementById('refresh-log-button');
+            button.disabled = true;
+            fetch('/get_logs/')
+                .then(response => response.text()) // Parse response as text
+                .then(data => {
+                    document.getElementById('log-content').innerText = data; // Set innerText directly
+                })
+                .finally(() => {
+                    button.disabled = false;
+                });
+        }
+
+        function refreshDbStats() {
+            const button = document.getElementById('refresh-db-stats-button');
+            button.disabled = true;
+            fetch('/get_db_stats/')
+                .then(response => response.json())
+                .then(data => {
+                    updateTable('db-stats-table', data);
+                })
+                .finally(() => {
+                    button.disabled = false;
+                });
+        }
+
+        function refreshMarketStats() {
+            const button = document.getElementById('refresh-market-stats-button');
+            button.disabled = true;
+            fetch('/get_market_stats/')
+                .then(response => response.json())
+                .then(data => {
+                    updateTable('market-stats-table', data);
+                })
+                .finally(() => {
+                    button.disabled = false;
+                });
+        }
+
+        function startScraping() {
+            const form = document.getElementById('scrape-form');
+            const formData = new FormData(form);
+            const items = formData.getAll('item');
+            if (items.length === 0) {
+                alert('Please select at least one item.');
+                return;
+            }
+            fetch('/start_scraping/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ items: items })
+            }).then(response => {
+                if (response.ok) {
+                    alert('Scraping started!');
+                    updateProgress();
+                } else {
+                    alert('Failed to start scraping.');
+                }
+            }).catch(error => {
+                console.error('Error starting scraping:', error);
+            });
+        }
+
+        function updateProgress() {
+            fetch('/scraping_status/')
+                .then(response => response.json())
+                .then(data => {
+                    const progressBarFill = document.getElementById('progress-bar-fill');
+                    progressBarFill.style.width = data.progress + '%';
+                    progressBarFill.textContent = data.progress + '%';
+                    if (data.progress < 100) {
+                        setTimeout(updateProgress, 1000); // Update every second
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching scraping status:', error);
+                });
+        }
+    </script>
+</body>
