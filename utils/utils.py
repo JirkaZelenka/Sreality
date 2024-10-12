@@ -159,6 +159,8 @@ class Utilities:
                 print(f"there are already {len(processed_files)} processed files")   
                 
         not_processed_files = [x for x in files if x not in processed_files]
+        #? this is necessary to ensure chronology of the files. and also groupes them by "type"
+        not_processed_files = sorted(not_processed_files)
         logger_scraping.info(f'Processing {len(not_processed_files)} non-processed files with prices for DB.')
         
         return not_processed_files

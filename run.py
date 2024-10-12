@@ -87,6 +87,8 @@ class Runner:
         This process takes all existing JSONs with estate details, compare unique codes to those in database,
         and preprocess and insert the new ones into estate_detail table.
         """
+        #TODO: this will grow large, as i always load all existing scraped estates 
+        #todo: and compare to all unique estates in DB
         
         #? First prepare all existing JSONs to df, and compare to existing DB
         logger_scraping.info(f'Starting processing JSONs to estate_detail table.')
@@ -136,7 +138,7 @@ class Runner:
             else:
                 logger_scraping.info(f'No need to insert into price_history bcs file {file_name} seems empty. DONE.')          
 
-    def input_all_prices_to_db2(self):
+    def input_all_prices_to_db2(self, limit_files = 14):
         """
         This process takes all existing CSVs with estate prices, 
         compares the names to those in the price_history_loaded.txt,
@@ -145,7 +147,11 @@ class Runner:
         
         logger_scraping.info(f'Starting processing CSVs to price_history_new2 table.')
         not_processed_files = self.utils.get_list_of_not_processed_files("price_history_loaded - kopie.txt")
+        print(not_processed_files)
         print(len(not_processed_files))
+        if len(not_processed_files) > limit_files:
+            not_processed_files = not_processed_files[:limit_files]
+            
         for file_name in not_processed_files:
             df_new = self.utils.process_file_to_df(file_name)
             df_new = df_new.drop_duplicates()
@@ -159,6 +165,45 @@ class Runner:
             else:
                 logger_scraping.info(f'No need to insert into price_history bcs file {file_name} seems empty. DONE.')
         
+        
+    def test_input_v1(self):
+        
+        logger_scraping.info(f'Starting processing CSVs to price_history_v1 table.')
+        not_processed_files = self.utils.get_list_of_not_processed_files("ph1.txt")
+        print(not_processed_files)
+        print(len(not_processed_files))
+        for file_name in not_processed_files:
+            df_new = self.utils.process_file_to_df(file_name)
+            df_new = df_new.drop_duplicates()
+
+            if len(df_new) > 0:
+                try:
+                    self.data_manager.insert_v1(df_new)
+                    self.utils._write_processed_prices([file_name], "ph1.txt")
+                except Exception as e:
+                    logger_scraping.error(f'Inserting into price_history failed for file {file_name}: {e}')
+            else:
+                logger_scraping.info(f'No need to insert into price_history bcs file {file_name} seems empty. DONE.')
+    
+    def test_input_v2(self):
+
+        logger_scraping.info(f'Starting processing CSVs to price_history_v2 table.')
+        not_processed_files = self.utils.get_list_of_not_processed_files("ph2.txt")
+        print(not_processed_files)
+        print(len(not_processed_files))
+        for file_name in not_processed_files:
+            df_new = self.utils.process_file_to_df(file_name)
+            df_new = df_new.drop_duplicates()
+
+            if len(df_new) > 0:
+                try:
+                    self.data_manager.insert_v2(df_new)
+                    self.utils._write_processed_prices([file_name], "ph2.txt")
+                except Exception as e:
+                    logger_scraping.error(f'Inserting into price_history failed for file {file_name}: {e}')
+            else:
+                logger_scraping.info(f'No need to insert into price_history bcs file {file_name} seems empty. DONE.')
+            
         
     def run_complete_scraping(self,
                               combinations: list["str"]

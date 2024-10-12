@@ -1,6 +1,5 @@
 
 import os
-os.chdir("c:\\Users\\jirka\\Documents\\MyProjects\\Sreality")
 
 from run import Runner
 runner = Runner()

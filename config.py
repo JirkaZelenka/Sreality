@@ -192,6 +192,29 @@ class Config:
                     end_date datetime NOT NULL,
                     FOREIGN KEY (estate_id) REFERENCES estate_detail (id)
                     ); 
-                    """                       
+                    """,       
+                    
+           "price_history_v1": 
+                    """ 
+                    CREATE TABLE IF NOT EXISTS price_history_v1 (
+                    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    estate_id VARCHAR(255) NOT NULL,
+                    price INTEGER NOT NULL,
+                    start_date datetime NOT NULL,
+                    end_date datetime NOT NULL,
+                    FOREIGN KEY (estate_id) REFERENCES estate_detail (id)
+                    ); 
+                    """,
+          "price_history_v2": 
+                    """ 
+                    CREATE TABLE IF NOT EXISTS price_history_v2 (
+                    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    estate_id VARCHAR(255) NOT NULL,
+                    price INTEGER NOT NULL,
+                    start_date datetime NOT NULL,
+                    end_date datetime NOT NULL,
+                    FOREIGN KEY (estate_id) REFERENCES estate_detail (id)
+                    ); 
+                    """                      
         }
         
