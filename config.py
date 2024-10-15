@@ -13,7 +13,7 @@ class Config:
         self.scraped_prices_folder = os.getenv("scraped_prices_folder")
         self.db_name = os.getenv("db_name") 
         self.mailing_credentials = {"server": os.getenv("server"),
-                                    "port": os.getenv("port"),
+                                    "port": os.getenv("smtp_port"),
                                     "sender_email": os.getenv("sender_email"),
                                     "password": os.getenv("password"),
                                     "receiver_email": os.getenv("receiver_email")
@@ -98,6 +98,7 @@ class Config:
                             "56": "komerční", # "ordinace"
                             "57": "apartmány" #
                             }
+           
                 
         self.table_definitions={
             "estate_detail": 
@@ -215,6 +216,17 @@ class Config:
                     end_date datetime NOT NULL,
                     FOREIGN KEY (estate_id) REFERENCES estate_detail (id)
                     ); 
-                    """                      
+                    """,
+         "saved_estates": 
+                    """ 
+                    CREATE TABLE IF NOT EXISTS saved_estates (
+                    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    estate_id VARCHAR(255) NOT NULL,
+                    notes VARCHAR(255) NOT NULL,
+                    added_date datetime NOT NULL,
+                    removed_date datetime NOT NULL,
+                    FOREIGN KEY (estate_id) REFERENCES estate_detail (id)
+                    ); 
+                    """                         
         }
         

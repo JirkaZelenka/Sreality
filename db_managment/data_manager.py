@@ -119,7 +119,20 @@ class DataManager:
                 return df
             
             except sqlite3.Error as e:
-                logger_scraping.error(f'Error loading rows from table {table_name} for timestamp {timestamp}: {e}') 
+                logger_scraping.error(f'Error loading rows from table {table_name}: {e}') 
+                conn.rollback()
+    
+    def get_all_favorites(self, table_name:str) -> pd.DataFrame:
+        
+        with self._get_connection() as conn:      
+
+            query = f"SELECT * FROM {table_name}"
+            try:
+                df = pd.read_sql_query(query, conn)
+                return df
+            
+            except sqlite3.Error as e:
+                logger_scraping.error(f'Error loading rows from table {table_name}: {e}') 
                 conn.rollback()
                 
     def clear_table(self, table_name):
@@ -257,27 +270,21 @@ class DataManager:
                 logger_scraping.error(f'Error inserting offer: {e}')        
                 conn.rollback()        
     
-    def insert_new_favorite(self, estate_id, notes, added_date):
+    def insert_new_favorite(self, table_name: str, estate_id: str, notes: str, added_date: str):
         
         with self._get_connection() as conn: 
             try:
                 cursor = conn.cursor()
                 
-                data_to_upload = []
-                data_to_upload.append([estate_id, notes, added_date])
-
-                query = f"""
-                        INSERT INTO estate_detail (
-                        estate_id, notes, added_date
-                        )
-                        
-                        VALUES (?, ?, ?)
-                        """             
-                cursor.executemany(query, data_to_upload)
+                cursor.execute(f"""
+                                INSERT INTO {table_name} (
+                                estate_id, notes, added_date, removed_date
+                                ) VALUES (?, ?, ?, ?)
+                                """, (estate_id, notes, added_date, "-"))
                 conn.commit()
 
             except sqlite3.Error as e:
-                logger_scraping.error(f'Error inserting estate_id {estate_id}: {e}')        
+                logger_scraping.error(f'Error inserting estate_id {estate_id} into table {table_name}: {e}')        
                 conn.rollback()
         
     # TODO: future use?
