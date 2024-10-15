@@ -12,3 +12,5 @@ scheduler
 tqdm
 typing
 unicodedata2
+dash
+dash_auth

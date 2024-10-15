@@ -12,6 +12,7 @@ class DataManager:
     Inserting new estate, updating estate info in estate_detail table.
     Adding new prices to scraped_prices table.
     """
+    #TODO: change all connections to conetxt, with conn
     
     def __init__(self) -> None: 
         self.cf = Config()      
@@ -105,11 +106,30 @@ class DataManager:
         
         conn.close()
         
-    def get_all_rows_from_date(self, table_name, timestamp):
+    def get_all_rows_from_date(self, table_name:str, timestamp=None) -> pd.DataFrame:
         
         conn = self._get_connection()        
+
+        query = f"SELECT * FROM {table_name}"
+        if timestamp:
+            query += f" WHERE crawled_at = '{timestamp}'"
         try:
-            query = f"SELECT * FROM {table_name} WHERE crawled_at = '{timestamp}'"
+            df = pd.read_sql_query(query, conn)
+            conn.close()
+            return df
+        
+        except sqlite3.Error as e:
+            logger_scraping.error(f'Error loading rows from table {table_name} for timestamp {timestamp}: {e}') 
+            conn.rollback()
+        
+        conn.close()
+        
+    def get_all_records(self, table_name:str, limit_count=100) -> pd.DataFrame:
+        
+        conn = self._get_connection()        
+
+        query = f"SELECT * FROM {table_name} LIMIT {limit_count}"
+        try:
             df = pd.read_sql_query(query, conn)
             conn.close()
             return df
@@ -556,8 +576,7 @@ class DataManager:
             conn.rollback()
             
         conn.close()       
-                
-        
+                        
     def transformation_create_dates(self, df):
         """
         Group DF by estate_id, order chronologically, and group the consecutive prices, 

@@ -1,0 +1,31 @@
+/* Custom font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+body {
+    font-family: 'Roboto', sans-serif;
+}
+
+.nav-link {
+    color: #ffffff;  /* White text for better contrast */
+    text-decoration: none;
+    margin: 0 10px;  /* Spacing between links */
+    font-weight: 500; /* Slightly bold */
+    transition: color 0.2s ease-in-out; /* Smooth transition */
+}
+
+.nav-link:hover {
+    color: #66b2ff; /* Light blue when hovered */
+}
+
+.nav-link:visited {
+    color: #d3d3d3; /* Light grey when visited */
+}
+
+.nav-link:active {
+    color: #d3d3d3; /* Light grey when active */
+}
+
+.separator {
+    color: #ffffff;  /* Color for the separator between links */
+    font-weight: 300; /* Lighter weight for the separator */
+}
