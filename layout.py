@@ -81,6 +81,51 @@ def create_favorite_layout():
         
         html.Div(id='output-message-favorite', 
                 style={'margin-top': '20px'}),
+        
+        html.Div([      
+            dash_table.DataTable(
+            id='favorites-table',
+            columns=[
+                {"name": "Estate", "id": "estate_id"},
+                {"name": "Note", "id": "notes"},
+                {"name": "Price", "id": "price"},
+                {"name": "Observation FROM", "id": "start_date"},
+                {"name": "Observation TO", "id": "end_date"},
+                ],
+            
+            style_table={
+            'maxWidth': '800px',
+            'margin': 'auto',
+            'border': '1px solid #ccc',
+            'borderRadius': '5px',
+            'overflowX': 'auto',
+            'overflowY': 'auto'
+            },
+            style_header={
+                'backgroundColor': '#f4f4f4',
+                'fontWeight': 'bold',
+                'textAlign': 'center',
+                'borderBottom': '2px solid #e5e5e5',
+                'color': '#333'
+            },
+            style_cell={
+                'padding': '10px',
+                'textAlign': 'center',
+                'border': '1px solid #e5e5e5',
+                'fontFamily': 'Arial, sans-serif',
+                'fontSize': '14px',
+            },
+            style_data={
+                'backgroundColor': '#ffffff',
+                'color': '#000',
+            },
+            page_size=20,
+            sort_action='native',
+            style_as_list_view=True,
+            #filter_action='native',
+            export_format='csv'
+            )       
+        ])
     ])
     return layout
 

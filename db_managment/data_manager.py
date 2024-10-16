@@ -109,11 +109,21 @@ class DataManager:
                 logger_scraping.error(f'Error loading rows from table {table_name} for timestamp {timestamp}: {e}') 
                 conn.rollback()
                 
-    def get_all_records(self, table_name:str, limit_count=100) -> pd.DataFrame:
-        
-        with self._get_connection() as conn:      
-
-            query = f"SELECT * FROM {table_name} LIMIT {limit_count}"
+    def get_all_records(self, table_name:str, limit_count=1000, offer_ids: list = None) -> pd.DataFrame:
+        """ 
+        Limit is here only for testing purpose.
+        """
+        with self._get_connection() as conn:   
+            
+            if offer_ids:
+                offer_ids_str = ', '.join(f"'{offer_id}'" for offer_id in offer_ids)
+                query = f"""
+                    SELECT * FROM {table_name} 
+                    WHERE estate_id IN ({offer_ids_str})
+                    LIMIT {limit_count} 
+                    """
+            else:
+                query = f"SELECT * FROM {table_name} LIMIT {limit_count}"
             try:
                 df = pd.read_sql_query(query, conn)
                 return df
