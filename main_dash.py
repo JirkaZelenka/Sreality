@@ -25,7 +25,8 @@ print(len(data))
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
 auth = dash_auth.BasicAuth(
     app,
-    VALID_USERNAME_PASSWORD_PAIRS
+    VALID_USERNAME_PASSWORD_PAIRS,
+    secret_key="Whatever_makes_the_dash_happy!123",
 )
 
 app.layout = create_layout()

@@ -56,7 +56,7 @@ def create_favorite_layout():
         
         html.H1("Favorites"),
         
-        dcc.Input(id='input-estate_id', type='text', placeholder='Enter Estate ID'),
+        dcc.Input(id='input-estate_id', type='text', placeholder='Enter Estate ID', style={'margin-right': '5px'}),
         
         dcc.Input(id='input-note', type='text', placeholder="Add some note"),
         
@@ -73,9 +73,27 @@ def create_favorite_layout():
                             'borderRadius': '8px',        
                             'cursor': 'pointer',          
                             'boxShadow': '0px 4px 8px rgba(0, 0, 0, 0.2)',  
+                            'transition': 'background-color 0.3s ease' ,
+                            
+                            'margin-right': '75px'
+                        },
+            ),
+            html.Button("Refresh favorite estate details", 
+                        id='refresh-favorite-button', 
+                        n_clicks=0,
+                        style={
+                            'padding': '10px 20px',       
+                            'fontSize': '18px',           
+                            'backgroundColor': '#007BFF', 
+                            'color': 'white',             
+                            'border': 'none',             
+                            'borderRadius': '8px',        
+                            'cursor': 'pointer',          
+                            'boxShadow': '0px 4px 8px rgba(0, 0, 0, 0.2)',  
                             'transition': 'background-color 0.3s ease' 
                         },
-            )],
+            )
+        ],
         style={'margin-top': '10px'}
         ),
         

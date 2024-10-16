@@ -62,24 +62,27 @@ def register_callbacks(app, runner, data):
           
      @app.callback(
           Output('favorites-table', 'data'),
-          Input('input-note', 'value')
+          Input('refresh-favorite-button', 'n_clicks'),
     )
      
-     def display_favorites(value):
-          #? this is fake input, i do not need it
+     def display_favorites(n_clicks):
           
-          saved_favs = runner.data_manager.get_all_favorites("saved_estates")
-          saved_estates_id = saved_favs['estate_id'].tolist()
-          
-          data = runner.data_manager.get_all_records(
-               "price_history_new2",
-               offer_ids=saved_estates_id
-               )
-          data = data.merge(saved_favs[['estate_id', 'notes']], on="estate_id",  how='left')
+          if n_clicks > 0:
+               saved_favs = runner.data_manager.get_all_favorites("saved_estates")
+               saved_estates_id = saved_favs['estate_id'].tolist()
+               
+               data = runner.data_manager.get_all_records(
+                    "price_history_new2",
+                    offer_ids=saved_estates_id
+                    )
+               data = data.merge(saved_favs[['estate_id', 'notes']], on="estate_id",  how='left')
 
-          data = data.sort_values(by='estate_id')
+               data = data.sort_values(by='estate_id')
+               
+               return data.to_dict('records')
           
-          return data.to_dict('records')
+          else:
+               pass
           
           
                     
